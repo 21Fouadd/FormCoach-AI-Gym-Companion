@@ -1,7 +1,7 @@
 {
   "exercise": "arm_abduction",
-  "winner_model": "XGBoost",
-  "best_tabular_model": "Random Forest",
+  "winner_model": "HistGradientBoosting",
+  "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
   "threshold": 0.5,
   "sequence_length": 32,
   "features": [
@@ -34,40 +34,40 @@
     27,
     28
   ],
-  "total_reps": 378,
-  "unique_subjects": 19,
+  "total_reps": 144,
+  "unique_subjects": 10,
   "leaderboard": [
     {
-      "Model": "XGBoost",
+      "Model": "HistGradientBoosting",
       "Family": "Tabular",
-      "OOF Macro F1": 0.7989,
-      "Accuracy": 0.7989,
-      "Balanced Acc": 0.799,
-      "ROC-AUC": 0.859
-    },
-    {
-      "Model": "LightGBM",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.7777,
-      "Accuracy": 0.7778,
-      "Balanced Acc": 0.7779,
-      "ROC-AUC": 0.8626
-    },
-    {
-      "Model": "SVM (RBF)",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.7576,
-      "Accuracy": 0.7593,
-      "Balanced Acc": 0.7597,
-      "ROC-AUC": 0.8551
+      "OOF Macro F1": 0.8929,
+      "Accuracy": 0.9097,
+      "Balanced Acc": 0.8905,
+      "ROC-AUC": 0.972
     },
     {
       "Model": "Random Forest",
       "Family": "Tabular",
-      "OOF Macro F1": 0.7495,
-      "Accuracy": 0.7513,
-      "Balanced Acc": 0.7518,
-      "ROC-AUC": 0.8591
+      "OOF Macro F1": 0.8894,
+      "Accuracy": 0.9028,
+      "Balanced Acc": 0.9045,
+      "ROC-AUC": 0.9766
+    },
+    {
+      "Model": "Unified Ensemble (RF+HGB+SVM)",
+      "Family": "Soft-Voting Ensemble",
+      "OOF Macro F1": 0.8894,
+      "Accuracy": 0.9028,
+      "Balanced Acc": 0.9045,
+      "ROC-AUC": 0.9739
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.8209,
+      "Accuracy": 0.8333,
+      "Balanced Acc": 0.8609,
+      "ROC-AUC": 0.9541
     }
   ]
 }

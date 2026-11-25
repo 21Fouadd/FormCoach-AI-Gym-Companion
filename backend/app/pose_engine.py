@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 import time
 import urllib.request
 import warnings
@@ -16,6 +17,13 @@ from pathlib import Path
 from typing import Any
 
 warnings.filterwarnings("ignore", category=UserWarning)
+
+# Compatibility shim for scikit-learn 1.6.x HistGradientBoosting pickles loaded on 1.9.x
+try:
+    import sklearn._loss._loss as _sk_loss
+    sys.modules.setdefault("_loss", _sk_loss)
+except Exception:
+    pass
 
 import cv2
 import joblib

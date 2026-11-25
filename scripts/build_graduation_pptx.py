@@ -114,22 +114,23 @@ def generate_leaderboard_chart(csv_path: Path, title: str, highlight_model: str,
 
 
 def generate_all6_rf_chart(out_png: Path) -> None:
-    """Plots OOF Macro F1 and ROC-AUC across all 6 deployed Random Forest exercise models."""
+    """Plots OOF Macro F1 and ROC-AUC across all 6 deployed production models."""
     ex_specs = [
-        ("shoulder", "Shoulder Press\n(25 subj · 1,961 reps)"),
-        ("curl", "Bicep Curl\n(25 subj · 2,175 reps)"),
-        ("push", "Push-Up\n(35 subj · Multi-View)"),
-        ("arm_abduction", "Arm Abduction\n(19 subj · 378 reps)"),
-        ("lunge", "Lunge\n(18 subj · 375 reps)"),
-        ("squat", "Squat (UI-PRMD)\n(10 subj · 232 reps)"),
+        ("shoulder", "Shoulder Press (RF)\n(25 subj · 1,961 reps)"),
+        ("push", "Push-Up (RF)\n(35 subj · Multi-View)"),
+        ("lunge", "Lunge (Ensemble)\n(UI-PRMD · 255 reps)"),
+        ("arm_abduction", "Arm Abduction (Ensemble)\n(UI-PRMD · 144 reps)"),
+        ("squat", "Squat (Ensemble)\n(UI-PRMD · 178 reps)"),
+        ("curl", "Bicep Curl (Ensemble)\n(NgoQuocBao · 439 reps)"),
     ]
     labels, f1s, aucs = [], [], []
     for ex_key, disp in ex_specs:
         df = pd.read_csv(ROOT / "backend" / "models" / ex_key / "model_leaderboard.csv")
-        rf_row = df[df["Model"] == "Random Forest"].iloc[0]
+        ens = df[df["Model"].str.contains("Unified Ensemble", na=False)]
+        row = ens.iloc[0] if len(ens) else df[df["Model"] == "Random Forest"].iloc[0]
         labels.append(disp)
-        f1s.append(float(rf_row["OOF Macro F1"]))
-        aucs.append(float(rf_row["ROC-AUC"]))
+        f1s.append(float(row["OOF Macro F1"]))
+        aucs.append(float(row["ROC-AUC"]))
 
     plt.rcParams.update({"font.sans-serif": ["Segoe UI", "DejaVu Sans"]})
     fig, ax = plt.subplots(figsize=(7.3, 4.45), dpi=300)
@@ -147,10 +148,10 @@ def generate_all6_rf_chart(out_png: Path) -> None:
         ax.text(v + 0.012, bar.get_y() + bar.get_height() / 2, f"{v:.4f}", va="center", color="#BAE6FD", fontsize=8.3, fontweight="bold")
 
     ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=8.6, color="#E2E8F0", fontweight="bold")
-    ax.set_xlim(0.0, 1.12)
+    ax.set_yticklabels(labels, fontsize=8.4, color="#E2E8F0", fontweight="bold")
+    ax.set_xlim(0.0, 1.14)
     ax.set_xlabel("Subject-Grouped 5-Fold Cross-Validation Score", fontsize=9.2, color="#94A3B8")
-    ax.set_title("Production Random Forest Models Deployed Across 6 Exercises", fontsize=11.0, fontweight="bold", color="#F8FAFC", loc="left", pad=10)
+    ax.set_title("Deployed Production Models Across 6 Exercises (Unified Ensemble + RF)", fontsize=10.6, fontweight="bold", color="#F8FAFC", loc="left", pad=10)
     ax.tick_params(axis="x", colors="#94A3B8", labelsize=8.4)
     ax.grid(axis="x", color="#1E293B", linestyle="--", linewidth=0.7, alpha=0.8)
     ax.set_axisbelow(True)
@@ -473,8 +474,8 @@ def build_deck() -> None:
     pt2.font.size = Pt(20)
     pt2.font.color.rgb = CYAN
 
-    add_kpi_tile(s1, 0.85, 4.05, 2.75, 1.15, "7 + Auto", "6/7 Trained RF + Stage-1 AI", EMERALD)
-    add_kpi_tile(s1, 3.85, 4.05, 2.75, 1.15, "0.9056 F1", "Upgraded UI-PRMD Squat RF", CYAN)
+    add_kpi_tile(s1, 0.85, 4.05, 2.75, 1.15, "7 + Auto", "6/7 ML + Stage-1 AI", EMERALD)
+    add_kpi_tile(s1, 3.85, 4.05, 2.75, 1.15, "0.977 / 0.927", "Curl & Squat Ensemble F1", CYAN)
     add_kpi_tile(s1, 6.85, 4.05, 2.75, 1.15, "3-Angle ID", "YuNet + SFace Biometric HUD", AMBER)
     add_kpi_tile(s1, 9.85, 4.05, 2.75, 1.15, "Web + Flutter", "FastAPI WS & TTS Coach", EMERALD)
 
@@ -694,16 +695,16 @@ def build_deck() -> None:
 
     # === SLIDE 8: SQUAT RESULTS ===
     s8 = prs.slides.add_slide(blank)
-    add_header(s8, "07 · Experimental Results — Squat", "Upgraded Squat Benchmark (UI-PRMD · 10 Subjects · 232 Reps)", 8)
+    add_header(s8, "07 · Experimental Results — Squat", "Upgraded Squat Benchmark (UI-PRMD · Unified Ensemble #1)", 8)
     s8.shapes.add_picture(str(squat_png), Inches(0.55), Inches(1.28), width=Inches(8.35))
-    add_kpi_tile(s8, 9.15, 1.30, 3.63, 1.05, "0.9056 F1", "Deployed Random Forest (+0.24 Jump)", EMERALD)
-    add_kpi_tile(s8, 9.15, 2.50, 3.63, 1.05, "0.9619 ROC-AUC", "90.95% Acc on Unseen Subjects", CYAN)
+    add_kpi_tile(s8, 9.15, 1.30, 3.63, 1.05, "0.9267 F1", "#1 Winner: RF + HistGB + SVM", EMERALD)
+    add_kpi_tile(s8, 9.15, 2.50, 3.63, 1.05, "92.7% Acc", "0.9204 ROC-AUC (Unseen Subjects)", CYAN)
     add_card(
         s8, 9.15, 3.75, 3.63, 3.00, "Key Takeaways (Squat)",
         [
-            "Adding UI-PRMD lifted Random Forest from 0.6656 (Mendeley+REHAB) to 0.9056 F1 & 0.9619 AUC.",
-            "XGBoost edged #1 at 0.9152 F1; Random Forest trails by <0.01 with zero external runtime risk.",
-            "Earlier 10-model Mendeley+REHAB benchmark also validated RF (#1, 0.6656) over BiLSTM+Attn (0.6374).",
+            "Soft-Voting Ensemble (RF+HistGB+SVM) ranked #1 at 0.9267 F1 (+1.13% over single RF 0.9154).",
+            "Upgraded from 0.6656 F1 (earlier 35-subj Mendeley+REHAB baseline) via UI-PRMD 3D kinematics.",
+            "Pure scikit-learn CPU ensemble runs live with zero TensorFlow overhead.",
         ],
         AMBER, body_size=11.2,
     )
@@ -726,23 +727,23 @@ def build_deck() -> None:
 
     # === SLIDE 10: FINAL MODEL SELECTION & ALL-6 DEPLOYMENT ===
     s10 = prs.slides.add_slide(blank)
-    add_header(s10, "09 · Final Model Selection", "Unified Production Random Forest Deployed Across 6 of 7 Exercises", 10)
+    add_header(s10, "09 · Final Model Selection", "Unified Soft-Voting Ensemble (RF + HistGB + SVM) Deployed Live", 10)
     s10.shapes.add_picture(str(all6_rf_png), Inches(0.55), Inches(1.28), width=Inches(7.70))
     add_card(
-        s10, 8.42, 1.28, 4.36, 2.75, "Why Unified Random Forest in Production?",
+        s10, 8.42, 1.28, 4.36, 2.75, "Why Unified Soft-Voting Ensemble?",
         [
-            "Deployed live across 6 exercises: Squat (0.9056), Lunge (0.7774 #1), Arm Abduction (0.7495), Push-Up (0.6444), Curl (0.6258 #1), Shoulder (0.5873) + SmartFit.",
-            "Pure scikit-learn CPU inference (~39–58 ms/rep) with zero TensorFlow GPU overhead.",
-            "Paired with calibrated biomechanical rules for explainable cues (+ Row fallback).",
+            "Combines 3 diverse families (Random Forest + HistGradientBoosting + SVM-RBF) in pure scikit-learn.",
+            "Beat single RF on Curl (0.9771), Squat (0.9267), and Lunge (0.8283, +11.6% F1 jump!) + tied Abduction (0.8894).",
+            "Push-Up (0.6444 RF / 0.6606 Deep+RF) & Shoulder (0.5873 RF) run live on CPU.",
         ],
         EMERALD, body_size=11.2,
     )
     add_card(
-        s10, 8.42, 4.20, 4.36, 2.56, "Multi-Dataset Lift & Deep Audit Option",
+        s10, 8.42, 4.20, 4.36, 2.56, "Per-Exercise vs. Single Universal Model",
         [
-            "Merging UI-PRMD boosted Lunge RF by +10.0% F1 (0.6774 -> 0.7774) and Arm Abduction RF by +7.5% F1 (0.6741 -> 0.7495).",
-            "Cross-Family 2D-CNN+BiGRU+RF Ensemble remains the Push-Up offline ceiling (0.6606 F1).",
-            "Milestone 2 target: TFLite / ONNX mobile export for offline Flutter inference.",
+            "We also tested 1 Universal Model across all exercises (0.9055 overall F1).",
+            "Per-exercise Unified Ensemble beat it by +9.25% on Lunge (0.8283 vs 0.7358) & +3.45% on Curl (0.9771 vs 0.9426).",
+            "Proves 1 unified architecture with per-exercise weights maximizes accuracy.",
         ],
         AMBER, body_size=11.2,
     )

@@ -1,5 +1,5 @@
 Model,Family,OOF Macro F1,Accuracy,Balanced Acc,ROC-AUC
-Random Forest,Tabular,0.7774,0.7787,0.7778,0.8217
-XGBoost,Tabular,0.7613,0.7653,0.7597,0.8437
-LightGBM,Tabular,0.7533,0.7573,0.7519,0.8333
-SVM (RBF),Tabular,0.6203,0.6427,0.6269,0.6825
+Unified Ensemble (RF+HGB+SVM),Soft-Voting Ensemble,0.8283,0.8431,0.8177,0.9255
+SVM (RBF),Tabular,0.8005,0.8196,0.7895,0.9294
+HistGradientBoosting,Tabular,0.745,0.7804,0.7342,0.8775
+Random Forest,Tabular,0.7121,0.7647,0.7053,0.8934
