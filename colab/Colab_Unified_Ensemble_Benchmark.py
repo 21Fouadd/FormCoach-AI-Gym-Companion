@@ -15,6 +15,7 @@
 import io
 import json
 import re
+import subprocess
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -22,6 +23,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import requests
 from scipy.signal import find_peaks, savgol_filter
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
@@ -136,16 +138,39 @@ def make_stacking_ensemble(seed: int) -> StackingClassifier:
 
 
 def _download(url: str, dest: Path, desc: str) -> Path:
+    # Reuse cached copy on Google Drive if available to avoid Zenodo rate-limits
+    drive_cache_dir = SAVE_ROOT / "dataset_cache"
+    drive_cache_dir.mkdir(parents=True, exist_ok=True)
+    cached = drive_cache_dir / dest.name
+    if cached.exists() and cached.stat().st_size > 10_000:
+        print(f"Using Drive-cached {desc} ({cached.stat().st_size / 1e6:.1f} MB)")
+        return cached
     if dest.exists() and dest.stat().st_size > 10_000:
         return dest
+
     print(f"Downloading {desc}...")
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=120) as r, dest.open("wb") as f:
-        while True:
-            chunk = r.read(1 << 20)
-            if not chunk:
-                break
-            f.write(chunk)
+    hdrs = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Accept": "*/*",
+    }
+    try:
+        with requests.get(url, headers=hdrs, stream=True, timeout=180, allow_redirects=True) as r:
+            r.raise_for_status()
+            with dest.open("wb") as f:
+                for chunk in r.iter_content(chunk_size=1 << 20):
+                    if chunk:
+                        f.write(chunk)
+    except Exception as e1:
+        print(f"  requests failed ({e1}); retrying via curl...")
+        subprocess.run(
+            ["curl", "-fsSL", "-A", hdrs["User-Agent"], "-o", str(dest), url],
+            check=True,
+        )
+    if dest.exists() and dest.stat().st_size > 10_000:
+        try:
+            cached.write_bytes(dest.read_bytes())
+        except Exception:
+            pass
     return dest
 
 
@@ -338,10 +363,14 @@ def load_uiprmd() -> dict[str, list[tuple[np.ndarray, int, str]]]:
         m, s, e = re.search(r"(m0[1-9]|m10)", bn), re.search(r"s(\d+)", bn), re.search(r"e(\d+)", bn)
         return (m.group(1), f"s{int(s.group(1)):02d}", f"e{int(e.group(1)):02d}" if e else "e00") if (m and s) else None
 
-    z_c = _download("https://zenodo.org/records/23104965/files/Segmented%20Movements.zip?download=1", WORK_DIR / "uiprmd_correct.zip", "UI-PRMD Correct")
-    z_i = _download("https://zenodo.org/records/23104965/files/Incorrect%20Movements.zip?download=1", WORK_DIR / "uiprmd_incorrect.zip", "UI-PRMD Incorrect")
     mv_map = {"m01": "squat", "m03": "lunge", "m07": "arm_abduction"}
     coll = {ex: [] for ex in mv_map.values()}
+    try:
+        z_c = _download("https://zenodo.org/records/23104965/files/Segmented%20Movements.zip?download=1", WORK_DIR / "uiprmd_correct.zip", "UI-PRMD Correct")
+        z_i = _download("https://zenodo.org/records/23104965/files/Incorrect%20Movements.zip?download=1", WORK_DIR / "uiprmd_incorrect.zip", "UI-PRMD Incorrect")
+    except Exception as e:
+        print(f"  [UI-PRMD] skipped ({e})")
+        return coll
     for zp, lbl in ((z_c, 0), (z_i, 1)):
         with zipfile.ZipFile(zp) as zf:
             names = [n for n in zf.namelist() if n.lower().endswith(".txt") and "kinect" in n.lower()]
