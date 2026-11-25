@@ -1,0 +1,38 @@
+# Python & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+backend/.venv/
+
+# Private user data, local SQLite DB, and generated videos
+backend/data/
+
+# Large local test & demo videos / archives
+test_videos/
+demo_outputs/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.zip
+
+# Duplicate Flutter export bundle
+formcoach_connected/
+
+# Flutter / Dart build artifacts
+formcoach/.dart_tool/
+formcoach/.packages
+formcoach/build/
+formcoach/.flutter-plugins*
+mobile_app/.dart_tool/
+mobile_app/build/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

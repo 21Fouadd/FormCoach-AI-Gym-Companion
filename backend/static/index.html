@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Gym Trainer — Live & Post-Set Demo</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #131a26;
+      --border: #233044;
+      --text: #e8eef7;
+      --muted: #8fa3bf;
+      --accent: #34d399;
+      --danger: #f87171;
+      --blue: #60a5fa;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    header {
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; background: #0f1520;
+    }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.3px; }
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; background: #1c293d; color: var(--accent); }
+    .tabs { display: flex; gap: 8px; padding: 14px 24px 0; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 10px 16px; border: none; background: transparent; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; font-size: 14px;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    main { max-width: 1180px; margin: 20px auto; padding: 0 20px 40px; }
+    .panel { display: none; }
+    .panel.active { display: grid; grid-template-columns: 1.45fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .panel.active { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+    }
+    .card h2 { margin: 0 0 12px; font-size: 16px; }
+    .stage-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/10; background: #05080e;
+      border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+    }
+    .stage-wrap video, .stage-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    #annotatedVideo {
+      position: static; width: 100%; height: auto; max-height: 520px;
+      object-fit: contain; border-radius: 10px; display: none; background: #000;
+      border: 1px solid var(--border);
+    }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; align-items: center; }
+    button, select, input {
+      background: #1b2434; color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 13px; font-size: 14px;
+    }
+    button.primary { background: var(--accent); color: #062116; border: none; font-weight: 700; cursor: pointer; }
+    button.danger { background: var(--danger); color: #2b0707; border: none; font-weight: 700; cursor: pointer; }
+    button.secondary { cursor: pointer; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    .stat { background: #0e1420; border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+    .stat .val { font-size: 24px; font-weight: 800; color: var(--accent); }
+    .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .cue-box {
+      padding: 14px; border-radius: 10px; background: #0e1420; border-left: 4px solid var(--accent);
+      margin-bottom: 14px; font-size: 15px; font-weight: 600;
+    }
+    .cue-box.bad { border-left-color: var(--danger); color: #fecaca; }
+    .user-chip {
+      padding: 12px; border-radius: 10px; background: #0e1420; border: 1px solid var(--border);
+      margin-bottom: 12px; font-size: 13px; line-height: 1.6;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--muted); }
+    .user-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
+    .user-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px; border-radius: 10px; background: #0e1420; border: 1px solid var(--border);
+    }
+    .user-item img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }
+    .ok { color: var(--accent); font-weight: 700; }
+    .err { color: var(--danger); font-weight: 700; }
+    .mode-switch { display: flex; gap: 8px; margin: 12px 0; }
+    .mode-btn { flex: 1; padding: 9px 12px; font-weight: 600; cursor: pointer; background: #0e1420; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; }
+    .mode-btn.active { background: #142b26; color: var(--accent); border-color: var(--accent); }
+    .faceid-box { background: #0e1420; border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; margin-top: 10px; }
+    .faceid-ring {
+      position: relative; width: 210px; height: 210px; margin: 0 auto 10px;
+      border-radius: 50%; overflow: hidden; border: 4px solid var(--blue);
+      background: #05080e; box-shadow: 0 0 22px rgba(96, 165, 250, 0.25); transition: border-color .25s, box-shadow .25s;
+    }
+    .faceid-ring.done { border-color: var(--accent); box-shadow: 0 0 26px rgba(52, 211, 153, 0.35); }
+    .faceid-ring video { position: static; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .faceid-countdown {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+      font-size: 54px; font-weight: 900; color: #fff; background: rgba(5, 8, 14, 0.38); text-shadow: 0 2px 14px #000;
+    }
+    .angle-pills { display: flex; justify-content: center; gap: 8px; margin: 8px 0 10px; flex-wrap: wrap; }
+    .angle-pill { padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #182234; color: var(--muted); border: 1px solid var(--border); }
+    .angle-pill.current { border-color: var(--blue); color: var(--blue); background: #12223a; }
+    .angle-pill.captured { border-color: var(--accent); color: var(--accent); background: #0f2922; }
+    .angle-thumbs { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .angle-thumb { width: 64px; text-align: center; font-size: 11px; color: var(--muted); }
+    .angle-thumb img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); display: block; margin: 0 auto 3px; }
+    .angle-thumb .empty { width: 60px; height: 60px; border-radius: 10px; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 3px; font-size: 16px; color: #475569; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI Gym Trainer — Live HUD, Face ID &amp; Form Coach</h1>
+    <div>
+      <span class="badge" id="healthBadge">Checking backend...</span>
+      <a href="/docs" target="_blank" style="color:#60a5fa;margin-left:12px;font-size:13px;">Swagger API Docs</a>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('live')">1. Live Camera Trainer</button>
+    <button class="tab" onclick="switchTab('postset')">2. Post-Set Video Analysis</button>
+    <button class="tab" onclick="switchTab('users')">3. Registered Users (Face ID)</button>
+  </div>
+
+  <main>
+    <!-- TAB 1: LIVE CAMERA -->
+    <section id="tab-live" class="panel active">
+      <div class="card">
+        <h2>Live Camera + Person HUD + Skeleton Overlay</h2>
+        <div class="stage-wrap">
+          <video id="webcam" autoplay playsinline muted></video>
+          <canvas id="overlay"></canvas>
+        </div>
+        <div class="controls">
+          <select id="liveExercise">
+            <option value="auto" selected>Auto-Detect Exercise (AI)</option>
+            <option value="squat">Squat</option>
+            <option value="push">Push-Up</option>
+            <option value="curl">Bicep Curl</option>
+            <option value="shoulder">Shoulder Press / OHP</option>
+            <option value="row">Bent-Over Row / Deadlift</option>
+            <option value="lunge">Lunge</option>
+            <option value="arm_abduction">Arm Abduction (Lateral Raise)</option>
+          </select>
+          <button class="primary" id="startBtn" onclick="startLive()">Start Live Trainer</button>
+          <button class="danger" id="stopBtn" onclick="stopLive()" disabled>Stop &amp; Save Set</button>
+          <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="voiceToggle" checked /> Voice Cues (TTS)
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Real-Time Coaching Metrics</h2>
+        <div class="user-chip" id="liveUserHud">
+          <strong>Active Athlete:</strong> Waiting for camera / Face ID...
+        </div>
+        <div class="stat-grid">
+          <div class="stat"><div class="val" id="statReps">0</div><div class="lbl">Reps</div></div>
+          <div class="stat"><div class="val" id="statScore">100%</div><div class="lbl">Form Score</div></div>
+          <div class="stat"><div class="val" id="statAngle">--°</div><div class="lbl">Joint Angle</div></div>
+        </div>
+        <div class="cue-box" id="liveCueBox">Coach: Step into frame facing the camera first so Face ID locks onto you.</div>
+        <div style="font-size:12px;color:var(--muted);" id="liveModelInfo">Model: --</div>
+      </div>
+    </section>
+
+    <!-- TAB 2: POST-SET VIDEO -->
+    <section id="tab-postset" class="panel">
+      <div class="card">
+        <h2>Upload Set Video for Full AI Analysis</h2>
+        <div class="controls" style="margin-top:0;margin-bottom:14px;">
+          <select id="postExercise">
+            <option value="auto" selected>Auto-Detect Exercise (AI)</option>
+            <option value="squat">Squat</option>
+            <option value="push">Push-Up</option>
+            <option value="curl">Bicep Curl</option>
+            <option value="shoulder">Shoulder Press / OHP</option>
+            <option value="row">Bent-Over Row / Deadlift</option>
+            <option value="lunge">Lunge</option>
+            <option value="arm_abduction">Arm Abduction (Lateral Raise)</option>
+          </select>
+          <input type="file" id="videoFile" accept="video/*" />
+          <button class="primary" onclick="analyzeVideo()">Analyze Video</button>
+        </div>
+        <div id="postStatus" style="font-size:13px;color:var(--muted);margin-bottom:10px;">Select an exercise video (MP4/MOV) to analyze reps, form, Face ID HUD, and cues.</div>
+        <video id="annotatedVideo" controls playsinline muted preload="auto"></video>
+        <div id="annotatedVideoActions" style="display:none;margin-top:8px;font-size:13px;">
+          <a id="annotatedVideoDownload" href="#" target="_blank" download style="color:var(--blue);text-decoration:underline;">Open / Download Annotated MP4</a>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Post-Set Breakdown</h2>
+        <div class="user-chip" id="postSummary">No video analyzed yet.</div>
+        <div id="repTableWrap"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: REGISTERED USERS -->
+    <section id="tab-users" class="panel">
+      <div class="card">
+        <h2>Register New User (Profile + Face ID Embedding)</h2>
+        <form id="regForm" onsubmit="registerUser(event)">
+          <div class="form-grid">
+            <label>Full Name<input name="name" required placeholder="e.g., Riad K." /></label>
+            <label>Age<input name="age" type="number" required value="22" /></label>
+            <label>Height (cm)<input name="height_cm" type="number" step="0.1" required value="178" /></label>
+            <label>Weight (kg)<input name="weight_kg" type="number" step="0.1" required value="75" /></label>
+            <label>Fitness Level
+              <select name="fitness_level">
+                <option value="Auto" selected>Auto (AI Predicted via SmartFit)</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </label>
+            <label>Gender
+              <select name="gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other" selected>Other</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="mode-switch">
+            <button type="button" class="mode-btn active" id="modeCamBtn" onclick="setRegMode('camera')">Live 3-Angle Face ID (Camera)</button>
+            <button type="button" class="mode-btn" id="modeFileBtn" onclick="setRegMode('file')">Upload Photo File</button>
+          </div>
+
+          <!-- Option A: Live 3-Angle Face ID Scanner -->
+          <div id="regCamSection" class="faceid-box">
+            <div class="faceid-ring" id="faceIdRing">
+              <video id="regWebcam" autoplay playsinline muted></video>
+              <div class="faceid-countdown" id="faceIdCountdown">3</div>
+            </div>
+            <div class="angle-pills">
+              <span class="angle-pill current" id="pill-front">1. Look Forward</span>
+              <span class="angle-pill" id="pill-left">2. Turn Left</span>
+              <span class="angle-pill" id="pill-right">3. Turn Right</span>
+            </div>
+            <div id="faceIdPrompt" style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;">
+              Click "Start Face ID Camera" to scan Forward, Left &amp; Right angles.
+            </div>
+            <div class="controls" style="justify-content:center;margin-top:6px;">
+              <button type="button" class="primary" id="startFaceIdBtn" onclick="startFaceIdCam()">Start Face ID Camera</button>
+              <button type="button" class="primary" id="captureAngleBtn" onclick="captureCurrentAngle()" disabled>Capture Pose</button>
+              <button type="button" class="secondary" id="autoScanBtn" onclick="runAutoFaceIdScan()" disabled>Auto-Scan (3-2-1)</button>
+              <button type="button" class="secondary" id="retakeFaceIdBtn" onclick="resetFaceIdCaptures()" disabled>Retake</button>
+            </div>
+            <div class="angle-thumbs">
+              <div class="angle-thumb"><div class="empty" id="thumb-front">1</div>Forward</div>
+              <div class="angle-thumb"><div class="empty" id="thumb-left">2</div>Left</div>
+              <div class="angle-thumb"><div class="empty" id="thumb-right">3</div>Right</div>
+            </div>
+          </div>
+
+          <!-- Option B: File Upload -->
+          <div id="regFileSection" style="display:none;margin-top:10px;">
+            <label style="display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted);">
+              Front Face Photo
+              <input id="regPhotoFile" name="photo" type="file" accept="image/*" />
+            </label>
+          </div>
+
+          <div class="controls">
+            <button class="primary" type="submit">Register Athlete</button>
+            <span id="regStatus" style="font-size:13px;color:var(--muted);"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Registered Athletes</h2>
+        <div class="user-list" id="userList">Loading...</div>
+      </div>
+    </section>
+  </main>
+
+<script>
+const LINKS = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28]];
+let stream = null, ws = null, sendTimer = null, frameInFlight = false, lastFrameSentAt = 0;
+const captureCanvas = document.createElement('canvas');
+
+function speak(text) {
+  if (!document.getElementById('voiceToggle').checked || !text) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.05;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['live','postset','users'][i] === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (id === 'users') loadUsers();
+  else stopFaceIdCam();
+}
+
+async function checkHealth() {
+  try {
+    const r = await fetch('/api/health');
+    const d = await r.json();
+    document.getElementById('healthBadge').textContent = `Backend Online • ${d.registered_users} Users`;
+  } catch {
+    document.getElementById('healthBadge').textContent = 'Backend Offline';
+  }
+}
+
+function sendLiveFrame() {
+  const video = document.getElementById('webcam');
+  if (!ws || ws.readyState !== 1 || !video || video.videoWidth === 0) return;
+  if (frameInFlight && (Date.now() - lastFrameSentAt) < 3000) return;
+  frameInFlight = true;
+  lastFrameSentAt = Date.now();
+  captureCanvas.width = 480;
+  captureCanvas.height = Math.round(480 * video.videoHeight / video.videoWidth);
+  captureCanvas.getContext('2d').drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+  const b64 = captureCanvas.toDataURL('image/jpeg', 0.65);
+  ws.send(JSON.stringify({ frame_b64: b64 }));
+}
+
+async function startLive() {
+  const cueBox = document.getElementById('liveCueBox');
+  try {
+    stopFaceIdCam();
+    clearInterval(sendTimer);
+    if (ws) { try { ws.close(); } catch {} ws = null; }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    frameInFlight = false;
+
+    const ex = document.getElementById('liveExercise').value;
+    cueBox.textContent = 'Coach: Starting webcam & connecting to AI backend...';
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false });
+    const video = document.getElementById('webcam');
+    video.srcObject = stream;
+    await video.play();
+
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws/live/${ex}`);
+    ws.onmessage = (ev) => {
+      frameInFlight = false;
+      const data = JSON.parse(ev.data);
+      if (data.type === 'frame_result') {
+        renderLiveResult(data);
+        setTimeout(sendLiveFrame, 40);
+      }
+      if (data.type === 'session_saved') {
+        alert(`Workout saved! Reps: ${data.session.total_reps}, Score: ${data.session.form_score}%`);
+      }
+    };
+    ws.onopen = () => {
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      cueBox.textContent = 'Coach: Connected! Step into frame to begin.';
+      sendLiveFrame();
+      sendTimer = setInterval(sendLiveFrame, 300);
+    };
+    ws.onerror = () => {
+      cueBox.textContent = 'Coach: WebSocket connection error. Check that the backend server is running.';
+    };
+    ws.onclose = () => {
+      clearInterval(sendTimer);
+      frameInFlight = false;
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    };
+  } catch (err) {
+    cueBox.textContent = 'Coach: Camera/Live error — ' + (err.message || err);
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+  }
+}
+
+function stopLive() {
+  clearInterval(sendTimer);
+  frameInFlight = false;
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ action: 'finish' }));
+    const closingWs = ws;
+    setTimeout(() => { try { closingWs.close(); } catch {} }, 400);
+  }
+  ws = null;
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+}
+
+function renderLiveResult(d) {
+  const video = document.getElementById('webcam');
+  const canvas = document.getElementById('overlay');
+  canvas.width = video.clientWidth;
+  canvas.height = video.clientHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const isBad = (d.verdict || '').toLowerCase() === 'incorrect';
+  const color = isBad ? '#f87171' : '#34d399';
+
+  // Draw person box + floating user HUD card
+  if (d.person_box) {
+    const [x1, y1, x2, y2] = d.person_box;
+    const bx = x1 * canvas.width, by = y1 * canvas.height;
+    const bw = (x2 - x1) * canvas.width, bh = (y2 - y1) * canvas.height;
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    ctx.strokeRect(bx, by, bw, bh);
+
+    const lines = d.user
+      ? [`${d.user.name} (${Math.round(d.recognition_confidence * 100)}% ID)`,
+         `Age: ${d.user.age} | Height: ${Math.round(d.user.height_cm)} cm`,
+         `Level: ${d.user.fitness_level}`]
+      : ['Unregistered Athlete', 'Face camera for Face ID'];
+
+    const cw = 235, ch = 18 * lines.length + 14;
+    const cx = Math.max(8, Math.min(bx, canvas.width - cw - 8));
+    const cy = Math.max(8, by - ch - 6);
+    ctx.fillStyle = 'rgba(13, 18, 28, 0.85)';
+    ctx.fillRect(cx, cy, cw, ch);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+    ctx.strokeRect(cx, cy, cw, ch);
+    ctx.font = '600 12px system-ui';
+    lines.forEach((txt, i) => {
+      ctx.fillStyle = i === 0 ? '#ffffff' : '#cbd5e1';
+      ctx.fillText(txt, cx + 8, cy + 18 + i * 18);
+    });
+  }
+
+  // Draw skeleton
+  if (d.landmarks) {
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    LINKS.forEach(([a, b]) => {
+      const pa = d.landmarks[String(a)], pb = d.landmarks[String(b)];
+      if (pa && pb) {
+        ctx.beginPath();
+        ctx.moveTo(pa[0] * canvas.width, pa[1] * canvas.height);
+        ctx.lineTo(pb[0] * canvas.width, pb[1] * canvas.height);
+        ctx.stroke();
+      }
+    });
+    Object.values(d.landmarks).forEach(([lx, ly]) => {
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(lx * canvas.width, ly * canvas.height, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  // Update side stats
+  const exLabels = {
+    auto: 'Auto-Detecting...', squat: 'Squat', push: 'Push-Up', curl: 'Bicep Curl',
+    shoulder: 'Shoulder Press / OHP', row: 'Bent-Over Row / Deadlift', lunge: 'Lunge', arm_abduction: 'Arm Abduction'
+  };
+  document.getElementById('statReps').textContent = d.rep_count;
+  document.getElementById('statScore').textContent = `${d.form_score}%`;
+  document.getElementById('statAngle').textContent = d.primary_angle != null ? `${d.primary_angle}°` : '--°';
+  document.getElementById('liveModelInfo').textContent = `Exercise: ${exLabels[d.exercise] || d.exercise} • Model: ${d.model_used}`;
+
+  const hud = document.getElementById('liveUserHud');
+  hud.innerHTML = d.user
+    ? `<strong>${d.user.name}</strong> (${Math.round(d.recognition_confidence * 100)}% Face Match)<br/>Age: ${d.user.age} • Height: ${d.user.height_cm} cm • Weight: ${d.user.weight_kg} kg • Level: <strong>${d.user.fitness_level}</strong>`
+    : `<strong>Unregistered Athlete</strong> — Register your face in Tab 3 so the HUD box recognizes you!`;
+
+  const cueBox = document.getElementById('liveCueBox');
+  cueBox.textContent = `Coach: ${(d.cues && d.cues[0]) || 'Tracking...'}`;
+  cueBox.className = isBad ? 'cue-box bad' : 'cue-box';
+
+  if (d.spoken_cue) speak(d.spoken_cue);
+}
+
+async function analyzeVideo() {
+  const fileInput = document.getElementById('videoFile');
+  if (!fileInput.files.length) return alert('Choose a video file first.');
+  const fd = new FormData();
+  fd.append('exercise', document.getElementById('postExercise').value);
+  fd.append('video', fileInput.files[0]);
+
+  document.getElementById('postStatus').textContent = 'Analyzing video (pose + Face ID + form model + rendering overlay)...';
+  const r = await fetch('/api/analyze/video', { method: 'POST', body: fd });
+  const d = await r.json();
+  if (!r.ok) {
+    document.getElementById('postStatus').textContent = 'Error: ' + (d.detail || r.statusText);
+    return;
+  }
+
+  document.getElementById('postStatus').textContent = `Done! Exercise: ${d.exercise.toUpperCase()} • ${d.total_reps} reps (${d.model_used}).`;
+  const vid = document.getElementById('annotatedVideo');
+  const videoSrc = `${d.video_url}?t=${Date.now()}`;
+  vid.style.display = 'block';
+  vid.muted = true;
+  vid.src = videoSrc;
+  vid.load();
+  vid.play().catch(() => {});
+  const dlWrap = document.getElementById('annotatedVideoActions');
+  const dlLink = document.getElementById('annotatedVideoDownload');
+  dlLink.href = d.video_url;
+  dlWrap.style.display = 'block';
+
+  const uTxt = d.recognized_user
+    ? `${d.recognized_user.name} (Age ${d.recognized_user.age}, ${d.recognized_user.height_cm}cm, ${d.recognized_user.fitness_level})`
+    : 'Not matched to a registered user';
+  document.getElementById('postSummary').innerHTML = `
+    <strong>Athlete:</strong> ${uTxt}<br/>
+    <strong>Reps:</strong> ${d.total_reps} (${d.correct_reps} correct, ${d.incorrect_reps} incorrect) • <strong>Score:</strong> ${d.form_score}%<br/>
+    <strong>Top Coaching Cues:</strong> ${d.summary_cues.join(' • ')}
+  `;
+  if (d.summary_cues.length) speak(d.summary_cues[0]);
+
+  let html = '<table><thead><tr><th>Rep</th><th>Time</th><th>Verdict</th><th>Coaching Cue</th></tr></thead><tbody>';
+  d.reps.forEach(rep => {
+    const cls = rep.is_incorrect ? 'err' : 'ok';
+    html += `<tr><td>#${rep.rep}</td><td>${rep.start_sec}s–${rep.end_sec}s</td><td class="${cls}">${rep.verdict}</td><td>${rep.cues.join(', ')}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('repTableWrap').innerHTML = html;
+}
+
+const FACE_STEPS = [
+  { key: 'front', label: 'Look straight forward at the camera', short: '1. Look Forward' },
+  { key: 'left',  label: 'Turn your head slightly to the LEFT', short: '2. Turn Left' },
+  { key: 'right', label: 'Turn your head slightly to the RIGHT', short: '3. Turn Right' },
+];
+let regMode = 'camera';
+let regStream = null;
+let faceIdStep = 0;
+let faceIdBlobs = { front: null, left: null, right: null };
+let autoScanning = false;
+
+function setRegMode(mode) {
+  regMode = mode;
+  document.getElementById('modeCamBtn').classList.toggle('active', mode === 'camera');
+  document.getElementById('modeFileBtn').classList.toggle('active', mode === 'file');
+  document.getElementById('regCamSection').style.display = mode === 'camera' ? 'block' : 'none';
+  document.getElementById('regFileSection').style.display = mode === 'file' ? 'block' : 'none';
+  if (mode === 'file') stopFaceIdCam();
+}
+
+function updateFaceIdUi() {
+  const ring = document.getElementById('faceIdRing');
+  const allDone = !!(faceIdBlobs.front && faceIdBlobs.left && faceIdBlobs.right);
+  ring.classList.toggle('done', allDone);
+
+  FACE_STEPS.forEach((st, idx) => {
+    const pill = document.getElementById('pill-' + st.key);
+    pill.classList.remove('current', 'captured');
+    if (faceIdBlobs[st.key]) {
+      pill.classList.add('captured');
+      pill.textContent = st.short + ' ✓';
+    } else if (idx === faceIdStep && regStream) {
+      pill.classList.add('current');
+      pill.textContent = st.short;
+    } else {
+      pill.textContent = st.short;
+    }
+  });
+
+  const promptEl = document.getElementById('faceIdPrompt');
+  if (allDone) {
+    promptEl.textContent = 'All 3 Face ID angles captured! Click "Register Athlete" below.';
+    document.getElementById('captureAngleBtn').disabled = true;
+    document.getElementById('autoScanBtn').disabled = true;
+  } else if (regStream) {
+    promptEl.textContent = `Pose ${faceIdStep + 1}/3: ${FACE_STEPS[faceIdStep].label}`;
+    document.getElementById('captureAngleBtn').disabled = autoScanning;
+    document.getElementById('autoScanBtn').disabled = autoScanning;
+  } else {
+    promptEl.textContent = 'Click "Start Face ID Camera" to scan Forward, Left & Right angles.';
+  }
+  document.getElementById('retakeFaceIdBtn').disabled = !(faceIdBlobs.front || faceIdBlobs.left || faceIdBlobs.right);
+}
+
+async function startFaceIdCam() {
+  try {
+    if (regStream) stopFaceIdCam();
+    regStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' }, audio: false });
+    const v = document.getElementById('regWebcam');
+    v.srcObject = regStream;
+    document.getElementById('startFaceIdBtn').textContent = 'Restart Camera';
+    updateFaceIdUi();
+    speak('Face ID scanner ready. Look straight forward at the camera.');
+  } catch (err) {
+    document.getElementById('faceIdPrompt').textContent = 'Camera access denied: ' + err.message;
+  }
+}
+
+function stopFaceIdCam() {
+  autoScanning = false;
+  if (regStream) {
+    regStream.getTracks().forEach(t => t.stop());
+    regStream = null;
+  }
+  const v = document.getElementById('regWebcam');
+  if (v) v.srcObject = null;
+  const cd = document.getElementById('faceIdCountdown');
+  if (cd) cd.style.display = 'none';
+  const btn = document.getElementById('startFaceIdBtn');
+  if (btn) btn.textContent = 'Start Face ID Camera';
+  const capBtn = document.getElementById('captureAngleBtn');
+  if (capBtn) capBtn.disabled = true;
+  const autoBtn = document.getElementById('autoScanBtn');
+  if (autoBtn) autoBtn.disabled = true;
+}
+
+function resetFaceIdCaptures() {
+  faceIdStep = 0;
+  faceIdBlobs = { front: null, left: null, right: null };
+  ['front', 'left', 'right'].forEach((k, i) => {
+    const el = document.getElementById('thumb-' + k);
+    el.outerHTML = `<div class="empty" id="thumb-${k}">${i + 1}</div>`;
+  });
+  updateFaceIdUi();
+}
+
+function captureCurrentAngle() {
+  return new Promise((resolve) => {
+    const v = document.getElementById('regWebcam');
+    if (!regStream || !v.videoWidth || faceIdStep >= FACE_STEPS.length) return resolve(false);
+    const stepObj = FACE_STEPS[faceIdStep];
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    const dataUrl = c.toDataURL('image/jpeg', 0.9);
+    c.toBlob((blob) => {
+      faceIdBlobs[stepObj.key] = blob;
+      const thumb = document.getElementById('thumb-' + stepObj.key);
+      thumb.outerHTML = `<img id="thumb-${stepObj.key}" src="${dataUrl}" alt="${stepObj.key}" />`;
+      faceIdStep++;
+      updateFaceIdUi();
+      if (faceIdStep < FACE_STEPS.length) {
+        speak(FACE_STEPS[faceIdStep].label);
+      } else {
+        speak('All three angles captured! Ready to register.');
+      }
+      resolve(true);
+    }, 'image/jpeg', 0.9);
+  });
+}
+
+async function runAutoFaceIdScan() {
+  if (!regStream || autoScanning) return;
+  resetFaceIdCaptures();
+  autoScanning = true;
+  updateFaceIdUi();
+  const cd = document.getElementById('faceIdCountdown');
+
+  for (let i = 0; i < FACE_STEPS.length; i++) {
+    if (!autoScanning || !regStream) break;
+    faceIdStep = i;
+    updateFaceIdUi();
+    speak(FACE_STEPS[i].label);
+    cd.style.display = 'flex';
+    for (let sec = 3; sec >= 1; sec--) {
+      if (!autoScanning || !regStream) break;
+      cd.textContent = String(sec);
+      await new Promise(r => setTimeout(r, 850));
+    }
+    cd.style.display = 'none';
+    if (!autoScanning || !regStream) break;
+    await captureCurrentAngle();
+    await new Promise(r => setTimeout(r, 450));
+  }
+  autoScanning = false;
+  cd.style.display = 'none';
+  updateFaceIdUi();
+}
+
+async function registerUser(ev) {
+  ev.preventDefault();
+  const fd = new FormData(ev.target);
+
+  if (regMode === 'camera') {
+    if (!faceIdBlobs.front) {
+      document.getElementById('regStatus').textContent = 'Please capture at least the Forward pose (or all 3 angles) first.';
+      return;
+    }
+    fd.delete('photo');
+    fd.append('photo', faceIdBlobs.front, 'face_front.jpg');
+    if (faceIdBlobs.left) fd.append('photo_left', faceIdBlobs.left, 'face_left.jpg');
+    if (faceIdBlobs.right) fd.append('photo_right', faceIdBlobs.right, 'face_right.jpg');
+  } else {
+    const fileIn = document.getElementById('regPhotoFile');
+    if (!fileIn.files || !fileIn.files.length) {
+      document.getElementById('regStatus').textContent = 'Please choose a front face photo file.';
+      return;
+    }
+  }
+
+  document.getElementById('regStatus').textContent = 'Extracting 3-angle SFace embeddings...';
+  const r = await fetch('/api/users/register', { method: 'POST', body: fd });
+  const d = await r.json();
+  if (!r.ok) {
+    document.getElementById('regStatus').textContent = 'Error: ' + (d.detail || r.statusText);
+    return;
+  }
+  const anglesTxt = (d.angles_enrolled && d.angles_enrolled.length) ? ` (${d.angles_enrolled.join(' + ')})` : '';
+  document.getElementById('regStatus').textContent = `Registered ${d.user.name}${anglesTxt}! Level: ${d.user.fitness_level}`;
+  speak(`Welcome ${d.user.name}, Face ID enrolled!`);
+  ev.target.reset();
+  resetFaceIdCaptures();
+  stopFaceIdCam();
+  loadUsers();
+  checkHealth();
+}
+
+async function loadUsers() {
+  const r = await fetch('/api/users');
+  const d = await r.json();
+  const box = document.getElementById('userList');
+  if (!d.users.length) {
+    box.innerHTML = '<div style="color:var(--muted);font-size:13px;">No registered athletes yet.</div>';
+    return;
+  }
+  box.innerHTML = d.users.map(u => `
+    <div class="user-item">
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${u.photo_url ? `<img src="${u.photo_url}" />` : ''}
+        <div>
+          <strong>${u.name}</strong> <span class="badge">${u.fitness_level}</span><br/>
+          <span style="font-size:12px;color:var(--muted);">Age ${u.age} • ${u.height_cm} cm • ${u.weight_kg} kg</span>
+        </div>
+      </div>
+      <button class="secondary" onclick="deleteUser(${u.id})">Remove</button>
+    </div>
+  `).join('');
+}
+
+async function deleteUser(id) {
+  await fetch(`/api/users/${id}`, { method: 'DELETE' });
+  loadUsers();
+  checkHealth();
+}
+
+checkHealth();
+</script>
+</body>
+</html>

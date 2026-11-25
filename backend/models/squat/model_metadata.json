@@ -1,0 +1,73 @@
+{
+  "exercise": "squat",
+  "winner_model": "XGBoost",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.5,
+  "sequence_length": 32,
+  "features": [
+    "left_elbow",
+    "right_elbow",
+    "left_shoulder",
+    "right_shoulder",
+    "left_hip",
+    "right_hip",
+    "torso_tilt",
+    "shoulder_line_tilt",
+    "hip_line_tilt",
+    "left_wrist_height",
+    "right_wrist_height",
+    "body_line",
+    "left_knee",
+    "right_knee"
+  ],
+  "core_joints": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "total_reps": 232,
+  "unique_subjects": 10,
+  "leaderboard": [
+    {
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9152,
+      "Accuracy": 0.9181,
+      "Balanced Acc": 0.9098,
+      "ROC-AUC": 0.9654
+    },
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9056,
+      "Accuracy": 0.9095,
+      "Balanced Acc": 0.8986,
+      "ROC-AUC": 0.9619
+    },
+    {
+      "Model": "LightGBM",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.8923,
+      "Accuracy": 0.8966,
+      "Balanced Acc": 0.8861,
+      "ROC-AUC": 0.9612
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.881,
+      "Accuracy": 0.8879,
+      "Balanced Acc": 0.8712,
+      "ROC-AUC": 0.9659
+    }
+  ]
+}

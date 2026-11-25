@@ -1,0 +1,93 @@
+{
+  "exercise": "push",
+  "winner_model": "Ensemble (Merged: 2D-CNN + BiGRU + Random Forest)",
+  "best_deep_model": "Merged: 2D-CNN + BiGRU",
+  "best_tabular_model": "Random Forest",
+  "ensemble_weights": {
+    "deep": 0.55,
+    "tabular": 0.45
+  },
+  "threshold": 0.5,
+  "sequence_length": 32,
+  "frame_step": 3,
+  "features": [
+    "left_elbow",
+    "right_elbow",
+    "left_shoulder",
+    "right_shoulder",
+    "left_hip",
+    "right_hip",
+    "torso_tilt",
+    "shoulder_line_tilt",
+    "hip_line_tilt",
+    "left_wrist_height",
+    "right_wrist_height",
+    "body_line",
+    "left_knee",
+    "right_knee"
+  ],
+  "core_joints": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "leaderboard_top3": [
+    {
+      "Model": "Ensemble (Merged: 2D-CNN + BiGRU + Random Forest)",
+      "Family": "Merged Ensemble",
+      "OOF Macro F1": 0.6606,
+      "Fold F1 (Mean\u00b1Std)": "0.660 \u00b1 0.054",
+      "Accuracy": 0.6669,
+      "Balanced Acc": 0.66,
+      "Incorrect Precision": 0.6271,
+      "Incorrect Recall": 0.6016,
+      "PR-AUC": 0.6198,
+      "ROC-AUC": 0.7061,
+      "Latency (ms/rep)": 84.69,
+      "Train (s/fold)": 13.06,
+      "Model Size (KB)": 2545.7,
+      "Real-Time Ready (<50ms)": "NO"
+    },
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.6444,
+      "Fold F1 (Mean\u00b1Std)": "0.643 \u00b1 0.057",
+      "Accuracy": 0.6483,
+      "Balanced Acc": 0.6451,
+      "Incorrect Precision": 0.5975,
+      "Incorrect Recall": 0.6179,
+      "PR-AUC": 0.6338,
+      "ROC-AUC": 0.7015,
+      "Latency (ms/rep)": 39.49,
+      "Train (s/fold)": 1.19,
+      "Model Size (KB)": 2372.9,
+      "Real-Time Ready (<50ms)": "YES"
+    },
+    {
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.6419,
+      "Fold F1 (Mean\u00b1Std)": "0.642 \u00b1 0.068",
+      "Accuracy": 0.6447,
+      "Balanced Acc": 0.6432,
+      "Incorrect Precision": 0.5906,
+      "Incorrect Recall": 0.6309,
+      "PR-AUC": 0.6173,
+      "ROC-AUC": 0.6922,
+      "Latency (ms/rep)": 12.05,
+      "Train (s/fold)": 1.91,
+      "Model Size (KB)": 87.5,
+      "Real-Time Ready (<50ms)": "YES"
+    }
+  ]
+}

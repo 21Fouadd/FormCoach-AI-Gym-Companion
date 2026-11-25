@@ -1,0 +1,86 @@
+{
+  "exercise": "shoulder",
+  "winner_model": "SVM (RBF)",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.5,
+  "sequence_length": 32,
+  "frame_step": 3,
+  "features": [
+    "left_elbow",
+    "right_elbow",
+    "left_shoulder",
+    "right_shoulder",
+    "left_hip",
+    "right_hip",
+    "torso_tilt",
+    "shoulder_line_tilt",
+    "hip_line_tilt",
+    "left_wrist_height",
+    "right_wrist_height",
+    "body_line",
+    "left_knee",
+    "right_knee"
+  ],
+  "core_joints": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "total_reps": 1961,
+  "unique_subjects": 25,
+  "leaderboard": [
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.6205,
+      "Accuracy": 0.6211,
+      "Balanced Acc": 0.6206,
+      "Incorrect Precision": 0.6219,
+      "Incorrect Recall": 0.6499,
+      "ROC-AUC": 0.6784,
+      "Latency (ms/rep)": 1.53
+    },
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.5873,
+      "Accuracy": 0.5885,
+      "Balanced Acc": 0.5877,
+      "Incorrect Precision": 0.589,
+      "Incorrect Recall": 0.6309,
+      "ROC-AUC": 0.6535,
+      "Latency (ms/rep)": 57.77
+    },
+    {
+      "Model": "LightGBM",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.5859,
+      "Accuracy": 0.5864,
+      "Balanced Acc": 0.586,
+      "Incorrect Precision": 0.5901,
+      "Incorrect Recall": 0.6108,
+      "ROC-AUC": 0.6369,
+      "Latency (ms/rep)": 1.35
+    },
+    {
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.5834,
+      "Accuracy": 0.5839,
+      "Balanced Acc": 0.5835,
+      "Incorrect Precision": 0.5876,
+      "Incorrect Recall": 0.6088,
+      "ROC-AUC": 0.6397,
+      "Latency (ms/rep)": 0.77
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Read CLAUDE.md and docs/ui_reference.html first. This is a Flutter graduation project (FormCoach).
+Do the "First tasks" in CLAUDE.md: generate the platform folders, get flutter analyze clean, add permissions,
+run it, and compare every screen against docs/ui_reference.html. Report what you fixed and what still differs.
+Do not start the ML or backend work until I give you the dataset details.

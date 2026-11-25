@@ -1,0 +1,73 @@
+{
+  "exercise": "lunge",
+  "winner_model": "Random Forest",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.5,
+  "sequence_length": 32,
+  "features": [
+    "left_elbow",
+    "right_elbow",
+    "left_shoulder",
+    "right_shoulder",
+    "left_hip",
+    "right_hip",
+    "torso_tilt",
+    "shoulder_line_tilt",
+    "hip_line_tilt",
+    "left_wrist_height",
+    "right_wrist_height",
+    "body_line",
+    "left_knee",
+    "right_knee"
+  ],
+  "core_joints": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "total_reps": 375,
+  "unique_subjects": 18,
+  "leaderboard": [
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.7774,
+      "Accuracy": 0.7787,
+      "Balanced Acc": 0.7778,
+      "ROC-AUC": 0.8217
+    },
+    {
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.7613,
+      "Accuracy": 0.7653,
+      "Balanced Acc": 0.7597,
+      "ROC-AUC": 0.8437
+    },
+    {
+      "Model": "LightGBM",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.7533,
+      "Accuracy": 0.7573,
+      "Balanced Acc": 0.7519,
+      "ROC-AUC": 0.8333
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.6203,
+      "Accuracy": 0.6427,
+      "Balanced Acc": 0.6269,
+      "ROC-AUC": 0.6825
+    }
+  ]
+}

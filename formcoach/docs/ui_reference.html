@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FormCoach - mobile UI preview</title>
+<style>
+:root{--bg:#0E0F11;--surface:#17191C;--hi:#202327;--line:#2A2E33;--text:#F4F5F2;--dim:#9AA0A6;--accent:#C6F432;--on:#10130A;--ok:#3DDC97;--warn:#FFB020;--bad:#FF5C4D}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#050506;font-family:system-ui,-apple-system,Roboto,sans-serif;color:var(--text)}
+body{display:flex;justify-content:center;align-items:center}
+.app{position:relative;width:100%;max-width:430px;height:100vh;max-height:900px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:500px){.app{height:860px;border-radius:36px;border:1px solid var(--line)}}
+.screen{display:none;flex:1;overflow-y:auto;padding:20px 16px 24px}
+.screen.on{display:block}
+.screen::-webkit-scrollbar{display:none}
+h1{font-size:28px;font-weight:800;line-height:1.2}
+.sub{color:var(--dim);font-size:14px;margin-top:4px}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:24px 0 8px}
+.sec b{font-size:18px;font-weight:700}.sec a{color:var(--accent);font-size:14px;cursor:pointer}
+.panel{background:var(--surface);border-radius:22px;padding:16px}
+.tap{cursor:pointer}
+.row{display:flex;align-items:center;gap:14px}
+.grow{flex:1;min-width:0}
+.btn{display:block;width:100%;height:54px;border:0;border-radius:14px;background:var(--accent);color:var(--on);font-size:16px;font-weight:700;cursor:pointer}
+.btn.out{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:600}
+.btn.dark{background:var(--on);color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border-radius:22px;padding:14px}
+.stat i{display:block;width:20px;height:20px;margin-bottom:10px}
+.stat b{font-size:24px;font-weight:800;display:block}
+.stat span{font-size:12px;color:var(--dim)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dim{color:var(--dim)}.s13{font-size:13px}
+.ring{--p:80;--c:var(--ok);width:var(--s,52px);height:var(--s,52px);border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(255,255,255,.12) 0);display:grid;place-items:center;flex:none}
+.ring::before{content:"";width:calc(100% - var(--t,12px));height:calc(100% - var(--t,12px));background:var(--surface);border-radius:50%;grid-area:1/1}
+.ring span{grid-area:1/1;text-align:center;font-weight:800;line-height:1;z-index:1}
+.ring small{display:block;font-size:10px;color:var(--dim);letter-spacing:1px;margin-top:2px;font-weight:400}
+nav{display:flex;background:var(--surface);height:68px;padding:0 8px}
+nav button{flex:1;background:none;border:0;color:var(--dim);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+nav button svg{width:22px;height:22px;padding:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav button .pill{width:56px;height:30px;border-radius:15px;display:grid;place-items:center}
+nav button.on{color:var(--text)}nav button.on .pill{background:var(--accent);color:var(--on)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:16px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer}
+.chip.on{background:var(--accent);color:var(--on);border-color:var(--accent)}
+.ex{margin-bottom:10px}
+.ico{width:56px;height:56px;border-radius:14px;background:var(--hi);display:grid;place-items:center;flex:none}
+.ico svg,.stat svg{stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bars{display:flex;align-items:flex-end;gap:8px;height:140px;margin-top:16px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;font-size:11px;color:var(--dim)}
+.bars i{display:block;width:100%;border-radius:6px;background:var(--hi)}
+.bars div:last-child i{background:var(--accent)}
+.meter{height:6px;border-radius:3px;background:var(--hi);margin-top:10px;overflow:hidden}.meter i{display:block;height:100%;background:var(--warn)}
+.video{position:relative;background:#000;border-radius:22px;aspect-ratio:9/12;overflow:hidden}
+.video svg.sk{position:absolute;inset:0;width:100%;height:100%}
+.tl{position:relative;height:28px;margin-top:10px}
+.tl .tr{position:absolute;left:0;right:0;top:12px;height:4px;border-radius:2px;background:var(--hi)}
+.tl .pr{position:absolute;left:0;top:12px;height:4px;border-radius:2px;background:var(--accent);width:30%}
+.tl .mk{position:absolute;top:10px;width:8px;height:8px;border-radius:50%;transform:translateX(-4px)}
+.finding{display:flex;gap:12px;margin-bottom:10px;cursor:pointer}
+.finding .bar{width:6px;border-radius:3px;flex:none}
+.live{position:absolute;inset:0;background:#050607;z-index:10;display:none;flex-direction:column}
+.live.on{display:flex}
+.cam{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#23272b,#0a0b0c 70%)}
+.cam svg{position:absolute;inset:0;width:100%;height:100%}
+.hud{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:18px 16px;background:linear-gradient(#000c,transparent 22%,transparent 55%,#000e)}
+.top{display:flex;align-items:center;gap:12px}
+.rb{width:44px;height:44px;border-radius:50%;background:#0009;border:0;color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none}
+.rb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.fb{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#0009;border:1.5px solid;font-size:13px;font-weight:600;margin:0 8px 8px 0}
+.reps{font-size:96px;font-weight:900;line-height:1}
+.phase{display:inline-block;background:var(--accent);color:var(--on);font-size:12px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:6px;margin-top:6px}
+.ctl{display:flex;gap:12px;align-items:center}
+.ctl .rb{width:56px;height:56px}
+
+.tabs{display:flex;border-bottom:1px solid var(--line);margin:12px -16px 0}
+.tabs div{flex:1;text-align:center;padding:12px 0;font-size:14px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent}
+.tabs div.on{color:var(--text);border-color:var(--accent)}
+.av{width:44px;height:44px;border-radius:50%;background:var(--hi);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.role{margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.8px;padding:2px 8px;border-radius:6px}
+.role.o{background:#C6F43229;color:var(--accent)}.role.a{background:#FFB02029;color:var(--warn)}
+.sm{height:38px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:none;color:var(--text);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.sm.f{background:var(--accent);color:var(--on);border:0}
+.fab{position:sticky;bottom:0;float:right;height:48px;padding:0 20px;border-radius:16px;border:0;background:var(--accent);color:var(--on);font-weight:700;font-size:15px;margin-top:8px;cursor:pointer}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:16px 8px 24px;z-index:20;display:none}
+.sheet.on{display:block}.sheet div{padding:14px 16px;font-size:16px;cursor:pointer}
+.scrim{position:absolute;inset:0;background:#0008;z-index:19;display:none}.scrim.on{display:block}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- HOME -->
+<section class="screen on" id="home">
+  <div class="row"><div class="grow"><div class="dim s13" style="font-size:14px">Good evening</div><h1>Alex</h1></div>
+    <div class="rb" style="background:var(--hi)" onclick="go('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div></div>
+  <div class="panel" style="background:var(--accent);color:var(--on);padding:20px;margin-top:24px">
+    <div style="font-size:12px;font-weight:800;letter-spacing:1.2px">TODAY'S PLAN</div>
+    <div style="font-size:30px;font-weight:900;margin:8px 0 4px">Leg Day</div>
+    <div style="font-size:14px;margin-bottom:18px">Back Squat, Lunge, Deadlift - 45 min</div>
+    <button class="btn dark" onclick="go('train')">Start session</button>
+  </div>
+  <div class="sec"><b>This week</b></div>
+  <div class="stats">
+    <div class="stat"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></svg><b>127</b><span>Reps counted</span></div>
+    <div class="stat"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><b>86</b><span>Avg form score</span></div>
+    <div class="stat"><svg viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg><b>5</b><span>Day streak</span></div>
+  </div>
+  <div class="sec"><b>Quick actions</b></div>
+  <div class="two">
+    <div class="panel tap" onclick="go('train')"><svg width="28" height="28" viewBox="0 0 24 24" style="stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg><div style="font-weight:700;margin-top:14px">Live form check</div><div class="dim" style="font-size:12px;margin-top:2px">Camera + rep counter</div></div>
+    <div class="panel tap" onclick="go('analyze')"><svg width="28" height="28" viewBox="0 0 24 24" style="stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><div style="font-weight:700;margin-top:14px">Analyze a video</div><div class="dim" style="font-size:12px;margin-top:2px">Upload your set</div></div>
+  </div>
+  <div class="sec"><b>Recent sessions</b><a onclick="go('progress')">See all</a></div>
+  <div id="recent"></div>
+</section>
+
+<!-- TRAIN -->
+<section class="screen" id="train">
+  <h1>Choose an exercise</h1><div class="sub">Prop your phone up so your full body is in frame.</div>
+  <div class="chips" id="chips"></div>
+  <div id="exlist"></div>
+</section>
+
+<!-- ANALYZE -->
+<section class="screen" id="analyze">
+  <h1>Video form check</h1><div class="sub">Record or upload a set and get rep-by-rep feedback.</div>
+  <div class="panel" style="margin-top:16px;padding:0 16px"><select style="width:100%;height:56px;background:none;border:0;color:var(--text);font-size:16px"><option>Back Squat</option><option>Push-up</option><option>Deadlift</option></select></div>
+  <div id="empty" class="panel" style="margin-top:16px;padding:24px;text-align:center">
+    <svg width="44" height="44" viewBox="0 0 24 24" style="stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>
+    <div style="font-size:17px;font-weight:700;margin:12px 0 4px">No video yet</div>
+    <div class="dim" style="margin-bottom:20px">Film from the side or front with your whole body in frame.</div>
+    <button class="btn" onclick="analyzeNow()">Record a set</button>
+    <button class="btn out" style="margin-top:10px" onclick="analyzeNow()">Upload from gallery</button>
+  </div>
+  <div id="result" style="display:none">
+    <div class="video" style="margin-top:16px">
+      <div class="cam"></div>
+      <svg class="sk" viewBox="0 0 100 133"><g stroke="#C6F432" stroke-width="1.2" stroke-linecap="round" fill="none"><path d="M50 26L50 36M50 36L41 38M50 36L59 38M41 38L37 52M59 38L63 52M50 36L50 78M50 78L43 78M50 78L57 78M43 78L42 112M57 78L58 112"/></g><g fill="#fff"><circle cx="50" cy="26" r="2"/><circle cx="41" cy="38" r="1.8"/><circle cx="59" cy="38" r="1.8"/><circle cx="37" cy="52" r="1.8"/><circle cx="63" cy="52" r="1.8"/><circle cx="50" cy="78" r="1.8"/><circle cx="42" cy="112" r="1.8"/><circle cx="58" cy="112" r="1.8"/></g></svg>
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:#0009;display:grid;place-items:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="#F4F5F2"><path d="M8 5v14l11-7z"/></svg></div>
+    </div>
+    <div class="tl"><div class="tr"></div><div class="pr"></div>
+      <i class="mk" style="left:18%;background:var(--ok)"></i><i class="mk" style="left:42%;background:var(--bad)"></i><i class="mk" style="left:65%;background:var(--warn)"></i><i class="mk" style="left:88%;background:var(--ok)"></i></div>
+    <div class="row s13 dim" style="justify-content:space-between"><span>00:05</span><span>00:17</span></div>
+    <div class="sec"><b>Analysis</b></div>
+    <div class="panel row"><div class="ring" style="--s:80px;--t:16px;--p:50;--c:var(--warn)"><span style="font-size:26px">50</span></div><div><div style="font-size:17px;font-weight:700">4 reps analyzed</div><div class="dim" style="margin-top:2px">2 clean, 2 need work</div></div></div>
+    <div style="height:12px"></div>
+    <div class="panel finding"><div class="bar" style="background:var(--ok);height:44px"></div><div class="grow"><b style="font-size:15px">Rep 1 - Good rep</b><div class="dim s13" style="margin-top:3px">Depth reached parallel, spine neutral.</div></div><b style="color:var(--accent)">00:03</b></div>
+    <div class="panel finding"><div class="bar" style="background:var(--bad);height:44px"></div><div class="grow"><b style="font-size:15px">Rep 2 - Knees caving in</b><div class="dim s13" style="margin-top:3px">Push knees out over the toes on the way up.</div></div><b style="color:var(--accent)">00:07</b></div>
+    <div class="panel finding"><div class="bar" style="background:var(--warn);height:44px"></div><div class="grow"><b style="font-size:15px">Rep 3 - Chest dropping</b><div class="dim s13" style="margin-top:3px">Torso leaned forward past 45 degrees.</div></div><b style="color:var(--accent)">00:11</b></div>
+    <div class="panel finding"><div class="bar" style="background:var(--ok);height:44px"></div><div class="grow"><b style="font-size:15px">Rep 4 - Good rep</b><div class="dim s13" style="margin-top:3px">Smooth tempo and full range.</div></div><b style="color:var(--accent)">00:15</b></div>
+    <button class="btn out" onclick="resetAnalyze()">Analyze another video</button>
+  </div>
+</section>
+
+<!-- PROGRESS -->
+<section class="screen" id="progress">
+  <h1>Progress</h1>
+  <div class="panel" style="margin-top:16px"><b style="font-size:16px">Form score trend</b><div class="dim s13" style="margin-top:2px">Weekly average, last 7 weeks</div><div class="bars" id="bars"></div></div>
+  <div class="sec"><b>Most common issues</b></div>
+  <div class="panel" style="margin-bottom:10px"><div class="row"><b class="grow" style="font-size:15px">Knees caving in</b><span class="dim s13">14 times</span></div><div class="meter"><i style="width:100%"></i></div></div>
+  <div class="panel" style="margin-bottom:10px"><div class="row"><b class="grow" style="font-size:15px">Chest dropping</b><span class="dim s13">9 times</span></div><div class="meter"><i style="width:64%"></i></div></div>
+  <div class="panel"><div class="row"><b class="grow" style="font-size:15px">Rounded lower back</b><span class="dim s13">5 times</span></div><div class="meter"><i style="width:36%"></i></div></div>
+  <div class="sec"><b>History</b></div><div id="hist"></div>
+</section>
+
+
+<section class="screen" id="community">
+  <h1>Community</h1>
+  <div class="tabs" id="ctabs"><div class="on" data-c="feed">Feed</div><div data-c="friends">Friends</div><div data-c="groups">Groups</div></div>
+  <div id="c-feed" style="margin-top:16px"></div>
+  <div id="c-friends" style="margin-top:16px;display:none"></div>
+  <div id="c-groups" style="margin-top:16px;display:none"></div>
+</section>
+
+<section class="screen" id="group">
+  <div class="row" style="margin-bottom:16px"><div class="rb" style="background:var(--hi)" onclick="go('community')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><b style="font-size:20px" id="gname"></b></div>
+  <div id="gbody"></div>
+</section>
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"></div>
+
+<!-- PROFILE -->
+<section class="screen" id="profile">
+  <div class="row" style="margin-bottom:20px"><div class="rb" style="background:var(--hi)" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><b style="font-size:20px">Profile</b></div>
+  <div style="text-align:center"><div class="rb" style="width:88px;height:88px;background:var(--hi);margin:0 auto 12px"><svg viewBox="0 0 24 24" style="width:44px;height:44px"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><div style="font-size:22px;font-weight:800">Alex</div><div class="dim">Gym member since Mar 2025</div></div>
+  <div class="sec"><b>Coaching</b></div>
+  <div class="panel" style="padding:4px 16px" id="toggles"></div>
+</section>
+
+<nav id="nav"></nav>
+
+<!-- LIVE SESSION -->
+<div class="live" id="live">
+  <div class="cam">
+    <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMid slice" id="skel"></svg>
+  </div>
+  <div class="hud">
+    <div class="top">
+      <button class="rb" onclick="endLive()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="grow"><div style="font-size:18px;font-weight:800" id="lname">Back Squat</div><div class="dim s13" id="ltime">00:00</div></div>
+      <div id="rec" style="display:none;background:var(--bad);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800">REC</div>
+    </div>
+    <div style="flex:1"></div>
+    <div id="pre">
+      <div style="background:#0009;border-radius:22px;padding:16px;text-align:center;font-size:15px;margin-bottom:16px" id="lcue"></div>
+      <button class="btn" onclick="startLive()">Start set</button>
+    </div>
+    <div id="run" style="display:none">
+      <div class="row" style="align-items:flex-end">
+        <div class="grow"><div class="dim" style="letter-spacing:1.4px;font-weight:700;font-size:13px">REPS</div><div class="reps" id="reps">0</div><span class="phase" id="phase">TOP</span></div>
+        <div class="ring" id="lring" style="--s:92px;--t:18px;--p:80;--c:var(--ok)"><span style="font-size:29px" id="lscore">80<small>FORM</small></span></div>
+      </div>
+      <div style="margin:16px 0 8px;min-height:84px" id="fchips"></div>
+      <div class="ctl"><button class="rb" id="recbtn" onclick="toggleRec()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg></button><button class="rb" onclick="togglePause()" id="pbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button><button class="btn" style="flex:1" onclick="endLive()">Finish set</button></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const ex=[
+ {n:'Back Squat',m:'Legs',c:'Chest up, knees track over toes, hit parallel.'},
+ {n:'Push-up',m:'Chest',c:'Straight line from head to heels, elbows at 45 degrees.'},
+ {n:'Deadlift',m:'Back',c:'Neutral spine, bar close to shins, drive through the floor.'},
+ {n:'Overhead Press',m:'Shoulders',c:'Ribs down, glutes tight, bar over mid-foot.'},
+ {n:'Lunge',m:'Legs',c:'Torso upright, front knee stable, long step.'},
+ {n:'Bicep Curl',m:'Arms',c:'Elbows pinned, no swinging, full range.'}];
+const sess=[['Back Squat','Yesterday',42,'14:20',88],['Push-up','2 days ago',60,'09:05',79],['Deadlift','4 days ago',25,'18:40',72]];
+const sc=s=>s>=85?'var(--ok)':s>=70?'var(--warn)':'var(--bad)';
+const ring=(s,sz)=>`<div class="ring" style="--s:${sz}px;--t:12px;--p:${s};--c:${sc(s)}"></div>`;
+const sessRow=(a,link)=>`<div class="panel row" style="margin-bottom:10px">${ring(a[4],52)}<div class="grow"><div style="font-size:16px;font-weight:700">${a[0]}</div><div class="dim s13" style="margin-top:2px">${a[1]} - ${a[2]} reps${link?' - '+a[3]:''}</div></div><b style="font-size:20px;color:${sc(a[4])}">${a[4]}</b></div>`;
+document.getElementById('recent').innerHTML=sess.map(a=>sessRow(a,1)).join('');
+document.getElementById('hist').innerHTML=sess.map(a=>sessRow(a,0)).join('');
+const W=[68,72,70,78,81,79,86];
+document.getElementById('bars').innerHTML=W.map((v,i)=>`<div><i style="height:${v}%"></i>W${i+1}</div>`).join('');
+const tg=[['Voice cues','Spoken feedback during sets',1],['Haptic alerts','Vibrate on bad form',1],['Show skeleton overlay','Draw tracked joints',1],['Auto-record sets','Save video for review',0]];
+document.getElementById('toggles').innerHTML=tg.map(t=>`<div class="row" style="padding:12px 0"><div class="grow"><div style="font-size:16px">${t[0]}</div><div class="dim s13">${t[1]}</div></div><div onclick="this.dataset.on=this.dataset.on==='1'?'0':'1';sw(this)" data-on="${t[2]}" class="sw"></div></div>`).join('');
+function sw(e){const on=e.dataset.on==='1';e.style.cssText=`width:52px;height:32px;border-radius:16px;position:relative;cursor:pointer;background:${on?'var(--accent)':'var(--hi)'};flex:none`;e.innerHTML=`<i style="position:absolute;top:4px;${on?'right':'left'}:4px;width:24px;height:24px;border-radius:50%;background:${on?'var(--on)':'var(--dim)'}"></i>`}
+document.querySelectorAll('.sw').forEach(sw);
+
+const P={me:['Alex Morgan','AM'],sara:['Sara Hassan','SH'],omar:['Omar Nabil','ON'],lina:['Lina Fouad','LF'],yous:['Youssef Adel','YA']};
+const posts=[['sara','2h ago','Leg Day Legends','New squat PB with clean form. Knees finally stopped caving.','Back Squat',12,94,18],['yous','5h ago','','21 day streak. Showing up beats motivation.','Push-up',50,88,32],['omar','Yesterday','Beginner Form Clinic','Deadlift form check please. Is my back rounding at the bottom?','Deadlift',5,71,6]];
+const av=k=>`<div class="av">${P[k][1]}</div>`;
+document.getElementById('c-feed').innerHTML=`<div class="panel row" style="margin-bottom:12px">${av('me')}<div class="grow dim">Share a set or ask for a form check</div></div>`+posts.map((p,i)=>`<div class="panel" style="margin-bottom:12px"><div class="row">${av(p[0])}<div class="grow"><b>${P[p[0]][0]}</b><div class="dim" style="font-size:12px">${p[1]}${p[2]?' - '+p[2]:''}</div></div></div><div style="margin:12px 0">${p[3]}</div><div class="row" style="background:var(--hi);border-radius:14px;padding:12px">${ring(p[6],48)}<div class="grow" style="font-weight:600">${p[4]} - ${p[5]} reps</div><b style="font-size:20px;color:${sc(p[6])}">${p[6]}</b></div><div class="row dim" style="margin-top:12px;gap:8px;cursor:pointer" onclick="lk(this,${p[7]})"><span>&#9825;</span><span>${p[7]}</span></div></div>`).join('');
+function lk(e,n){const on=e.dataset.l!=='1';e.dataset.l=on?'1':'0';e.style.color=on?'var(--bad)':'';e.children[0].innerHTML=on?'&#9829;':'&#9825;';e.children[1].textContent=n+(on?1:0)}
+const frs=[['sara',12,91],['omar',7,84],['lina',3,77],['yous',21,88]];
+document.getElementById('c-friends').innerHTML=`<input placeholder="Search by name or username" style="width:100%;height:48px;border-radius:14px;border:0;background:var(--surface);color:var(--text);padding:0 16px;font-size:15px"><div class="sec"><b>Requests</b></div><div class="panel row" style="margin-bottom:10px"><div class="av">HS</div><b class="grow">Hana Samir</b><button class="sm f">Accept</button></div><div class="sec"><b>Friends (4)</b></div>`+frs.map(f=>`<div class="panel row" style="margin-bottom:10px">${av(f[0])}<div class="grow"><b>${P[f[0]][0]}</b><div class="dim" style="font-size:12px">${f[1]} day streak - form ${f[2]}</div></div><button class="sm">Challenge</button></div>`).join('')+`<div class="sec"><b>People you may know</b></div>`+[['Karim Wael','KW'],['Nour Tarek','NT']].map(x=>`<div class="panel row" style="margin-bottom:10px"><div class="av">${x[1]}</div><b class="grow">${x[0]}</b><button class="sm" onclick="this.textContent='Sent';this.style.color='var(--dim)'">+ Add</button></div>`).join('');
+const G=[
+{n:'Leg Day Legends',d:'Squats, lunges and deadlifts. Share your sets, fix your form together.',priv:1,role:'o',joined:1,cnt:6,m:[['me','o',118],['sara','a',142],['omar','m',96],['yous','m',131],['lina','m',64]]},
+{n:'Campus Gym Crew',d:'University gym buddies. Weekly challenges every Sunday.',priv:1,role:'m',joined:1,cnt:14,m:[['omar','o',110],['sara','a',142],['me','m',118]]},
+{n:'Beginner Form Clinic',d:'Post a clip, get feedback. New lifters welcome.',priv:0,role:'m',joined:0,cnt:1280,m:[]},
+{n:'Calisthenics Cairo',d:'Push-ups, pull-ups, dips. Meetups and weekly rep challenges.',priv:0,role:'m',joined:0,cnt:642,m:[]}];
+const rl=r=>r==='o'?'<span class="role o">OWNER</span>':r==='a'?'<span class="role a">ADMIN</span>':'';
+const gc=(g,i)=>`<div class="panel row tap" style="margin-bottom:10px" onclick="openGroup(${i})"><div class="ico" style="width:52px;height:52px"><svg width="26" height="26" viewBox="0 0 24 24" style="stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${g.priv?'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 3-5 6-5s6 1.500 6 5M16 15c3 0 5 1.500 5 4"/>':'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'}</svg></div><div class="grow"><div style="display:flex;align-items:center"><b style="font-size:16px">${g.n}</b>${g.joined?rl(g.role):''}</div><div class="dim s13" style="margin-top:2px">${g.cnt.toLocaleString()} members - ${g.priv?'Private':'Public'}</div></div>${g.joined?'':'<button class="sm" onclick="event.stopPropagation();this.textContent=\'Joined\'">Join</button>'}</div>`;
+document.getElementById('c-groups').innerHTML=`<b style="font-size:18px">My groups</b><div style="height:8px"></div>`+G.slice(0,2).map((g,i)=>gc(g,i)).join('')+`<div class="sec"><b>Discover communities</b></div>`+G.slice(2).map((g,i)=>gc(g,i+2)).join('')+`<button class="fab">+ Create group</button>`;
+document.querySelectorAll('#ctabs div').forEach(t=>t.onclick=()=>{document.querySelectorAll('#ctabs div').forEach(x=>x.classList.toggle('on',x===t));['feed','friends','groups'].forEach(k=>document.getElementById('c-'+k).style.display=k===t.dataset.c?'block':'none')});
+let cg=null;
+function canMg(g){return g.joined&&g.role!=='m'}
+function openGroup(i){cg=G[i];renderGroup();go('group')}
+function renderGroup(){const g=cg,mg=canMg(g),own=g.joined&&g.role==='o';document.getElementById('gname').textContent=g.n;
+ const rk=[...g.m].sort((a,b)=>b[2]-a[2]).slice(0,3);
+ document.getElementById('gbody').innerHTML=`<div class="panel"><div class="dim s13">${g.priv?'Private group':'Public community'} - ${g.cnt.toLocaleString()} members</div><div style="margin:10px 0 16px">${g.d}</div>${!g.joined?'<button class="btn">Join</button>':mg?'<div style="display:flex;gap:10px"><button class="btn" style="flex:1">Invite</button><button class="btn out" style="flex:1">Announce</button></div>':'<button class="btn out">Leave group</button>'}</div>`+(g.m.length?`<div class="sec"><b>This week leaderboard</b></div>`+rk.map((m,i)=>`<div class="panel row" style="margin-bottom:10px"><b style="width:24px;font-size:20px;color:${i?'var(--dim)':'var(--accent)'}">${i+1}</b>${av(m[0])}<b class="grow">${P[m[0]][0]}</b><b>${m[2]} reps</b></div>`).join('')+`<div class="sec"><b>Members (${g.m.length})</b>${mg?'<a>Manage</a>':''}</div>`+g.m.map((m,i)=>`<div class="panel row ${mg?'tap':''}" style="margin-bottom:10px" ${mg&&m[1]!=='o'?`onclick="memberMenu(${i})"`:''}>${av(m[0])}<div class="grow" style="display:flex;align-items:center"><b>${P[m[0]][0]}</b>${rl(m[1])}</div>${mg&&m[1]!=='o'?'<span class="dim">&middot;&middot;&middot;</span>':''}</div>`).join(''):'')}
+function memberMenu(i){const g=cg,m=g.m[i],own=g.role==='o';let h=`<div style="font-weight:700">${P[m[0]][0]}</div>`;
+ if(own&&m[1]==='m')h+=`<div onclick="setRole(${i},'a')">Make admin</div>`;
+ if(own&&m[1]==='a')h+=`<div onclick="setRole(${i},'m')">Remove admin</div>`;
+ if(m[1]==='m'||own)h+=`<div style="color:var(--bad)" onclick="rmMember(${i})">Remove from group</div>`;
+ document.getElementById('sheet').innerHTML=h;document.getElementById('sheet').classList.add('on');document.getElementById('scrim').classList.add('on')}
+function closeSheet(){document.getElementById('sheet').classList.remove('on');document.getElementById('scrim').classList.remove('on')}
+function setRole(i,r){cg.m[i][1]=r;closeSheet();renderGroup()}
+function rmMember(i){cg.m.splice(i,1);closeSheet();renderGroup()}
+
+let filt='All';
+function drawEx(){const g=['All',...new Set(ex.map(e=>e.m))];
+ document.getElementById('chips').innerHTML=g.map(x=>`<div class="chip ${x===filt?'on':''}" onclick="filt='${x}';drawEx()">${x}</div>`).join('');
+ document.getElementById('exlist').innerHTML=ex.filter(e=>filt==='All'||e.m===filt).map(e=>`<div class="panel row tap ex" onclick="openLive('${e.n}','${e.c}')"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg></div><div class="grow"><div style="font-size:17px;font-weight:700">${e.n}</div><div class="dim s13" style="margin-top:2px">${e.c}</div></div><span class="dim">&rsaquo;</span></div>`).join('')}
+drawEx();
+const tabs=[['home','Home','<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'],['train','Train','<path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/>'],['analyze','Analyze','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/>'],['community','Community','<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.500"/><path d="M3 20c0-3.500 3-5 6-5s6 1.500 6 5M16 15c3 0 5 1.500 5 4"/>'],['progress','Progress','<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>']];
+document.getElementById('nav').innerHTML=tabs.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')"><span class="pill"><svg viewBox="0 0 24 24">${t[2]}</svg></span>${t[1]}</button>`).join('');
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===(id==='group'?'community':id)));document.getElementById(id).scrollTop=0}
+go('home');
+function analyzeNow(){document.getElementById('empty').style.display='none';document.getElementById('result').style.display='block'}
+function resetAnalyze(){document.getElementById('empty').style.display='block';document.getElementById('result').style.display='none'}
+let t0,tm,fr,reps,paused,tick,recOn;
+function skel(d){const hy=105+d*22,sy=d*14;const P=[[50,38+sy],[50,52+sy],[40,56+sy],[60,56+sy],[34,76+sy*.6],[66,76+sy*.6],[50,hy],[43,hy],[57,hy],[42,170],[58,170]];
+ const E=[[0,1],[1,2],[1,3],[2,4],[3,5],[1,6],[6,7],[6,8],[7,9],[8,10]];
+ document.getElementById('skel').innerHTML=E.map(e=>`<line x1="${P[e[0]][0]}" y1="${P[e[0]][1]}" x2="${P[e[1]][0]}" y2="${P[e[1]][1]}" stroke="#C6F432" stroke-width="1.2" stroke-linecap="round"/>`).join('')+P.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.8" fill="#fff"/>`).join('')}
+skel(0);
+function openLive(n,c){document.getElementById('lname').textContent=n;document.getElementById('lcue').textContent=c;document.getElementById('pre').style.display='block';document.getElementById('run').style.display='none';document.getElementById('ltime').textContent='00:00';document.getElementById('live').classList.add('on')}
+function startLive(){document.getElementById('pre').style.display='none';document.getElementById('run').style.display='block';reps=0;tick=0;paused=false;recOn=false;t0=0;
+ tm=setInterval(()=>{if(!paused){t0++;document.getElementById('ltime').textContent=String(Math.floor(t0/60)).padStart(2,'0')+':'+String(t0%60).padStart(2,'0')}},1000);
+ fr=setInterval(()=>{if(paused)return;tick++;const t=(tick%40)/40,d=Math.sin(t*Math.PI);if(tick%40===0)reps++;
+  const s=Math.round(72+Math.random()*24);skel(d);
+  document.getElementById('reps').textContent=reps;
+  document.getElementById('phase').textContent=d<.15?'TOP':(t<.5?'DOWN':'UP');
+  const r=document.getElementById('lring');r.style.setProperty('--p',s);r.style.setProperty('--c',sc(s));
+  document.getElementById('lscore').innerHTML=s+'<small>FORM</small>';
+  const ch=[];if(d>.8&&s<80)ch.push(['Knees caving in','var(--bad)']);if(d>.5&&s<88)ch.push(['Chest dropping','var(--warn)']);if(s>=88)ch.push(['Good depth','var(--ok)']);
+  document.getElementById('fchips').innerHTML=ch.map(c=>`<span class="fb" style="border-color:${c[1]}"><i style="width:8px;height:8px;border-radius:50%;background:${c[1]}"></i>${c[0]}</span>`).join('')},100)}
+function endLive(){clearInterval(tm);clearInterval(fr);document.getElementById('live').classList.remove('on');document.getElementById('rec').style.display='none'}
+function togglePause(){paused=!paused;document.getElementById('pbtn').innerHTML=paused?'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>'}
+function toggleRec(){recOn=!recOn;document.getElementById('rec').style.display=recOn?'block':'none';document.getElementById('recbtn').style.color=recOn?'var(--bad)':'var(--text)'}
+</script>
+</body>
+</html>

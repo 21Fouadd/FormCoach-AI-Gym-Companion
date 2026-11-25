@@ -1,0 +1,77 @@
+{
+  "exercise": "curl",
+  "winner_model": "Random Forest",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.47,
+  "sequence_length": 32,
+  "features": [
+    "left_elbow",
+    "right_elbow",
+    "left_shoulder",
+    "right_shoulder",
+    "left_hip",
+    "right_hip",
+    "torso_tilt",
+    "shoulder_line_tilt",
+    "hip_line_tilt",
+    "left_wrist_height",
+    "right_wrist_height",
+    "body_line",
+    "left_knee",
+    "right_knee"
+  ],
+  "core_joints": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+  ],
+  "datasets": [
+    "",
+    "NgoQuocBao1010_BicepCurl"
+  ],
+  "total_reps": 439,
+  "unique_subjects": 77,
+  "leaderboard": [
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9748,
+      "Accuracy": 0.9749,
+      "Balanced Acc": 0.9738,
+      "ROC-AUC": 0.9951
+    },
+    {
+      "Model": "LightGBM",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9748,
+      "Accuracy": 0.9749,
+      "Balanced Acc": 0.9741,
+      "ROC-AUC": 0.9921
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9703,
+      "Accuracy": 0.9704,
+      "Balanced Acc": 0.971,
+      "ROC-AUC": 0.9946
+    },
+    {
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9565,
+      "Accuracy": 0.9567,
+      "Balanced Acc": 0.9558,
+      "ROC-AUC": 0.9926
+    }
+  ]
+}

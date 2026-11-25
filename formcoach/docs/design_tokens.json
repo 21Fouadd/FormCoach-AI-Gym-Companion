@@ -1,0 +1,48 @@
+{
+  "name": "FormCoach",
+  "version": 1,
+  "color": {
+    "themes": [{"id": "dark", "name": "Dark"}],
+    "tokens": [
+      {"name": "bg", "value": "#0E0F11", "usage": "App background."},
+      {"name": "surface", "value": "#17191C", "usage": "Cards and panels."},
+      {"name": "surface-hi", "value": "#202327", "usage": "Raised surfaces, inactive bars, icon tiles."},
+      {"name": "line", "value": "#2A2E33", "usage": "Borders and dividers."},
+      {"name": "text", "value": "#F4F5F2", "usage": "Primary text on bg and surface."},
+      {"name": "text-dim", "value": "#9AA0A6", "usage": "Secondary text and captions on bg and surface."},
+      {"name": "accent", "value": "#C6F432", "usage": "Primary action, selected state, progress."},
+      {"name": "on-accent", "value": "#10130A", "usage": "Text and icons on accent."},
+      {"name": "ok", "value": "#3DDC97", "usage": "Good form, score 85 and above."},
+      {"name": "warn", "value": "#FFB020", "usage": "Minor form issue, score 70 to 84."},
+      {"name": "bad", "value": "#FF5C4D", "usage": "Major form issue, score below 70, recording."}
+    ]
+  },
+  "type": {
+    "fonts": [],
+    "families": {"sans": "system-ui, -apple-system, Roboto, sans-serif"},
+    "groups": [
+      {"name": "Text", "family": "sans", "styles": [
+        {"name": "display-rep", "fontSize": "96px", "lineHeight": "96px", "fontWeight": 900},
+        {"name": "title-screen", "fontSize": "28px", "lineHeight": "34px", "fontWeight": 800},
+        {"name": "title-section", "fontSize": "18px", "lineHeight": "24px", "fontWeight": 700},
+        {"name": "title-card", "fontSize": "16px", "lineHeight": "22px", "fontWeight": 700},
+        {"name": "body", "fontSize": "14px", "lineHeight": "20px", "fontWeight": 400},
+        {"name": "caption", "fontSize": "12px", "lineHeight": "16px", "fontWeight": 400},
+        {"name": "overline", "fontSize": "12px", "lineHeight": "16px", "fontWeight": 800}
+      ]}
+    ]
+  },
+  "spacing": {"tokens": [
+    {"name": "space-xs", "value": "4px", "usage": "Icon to label gaps."},
+    {"name": "space-sm", "value": "8px", "usage": "Chip gaps, tight stacks."},
+    {"name": "space-md", "value": "16px", "usage": "Screen and card padding."},
+    {"name": "space-lg", "value": "24px", "usage": "Between sections."},
+    {"name": "space-xl", "value": "32px", "usage": "Bottom scroll padding."}
+  ]},
+  "radius": {"tokens": [
+    {"name": "radius-sm", "value": "8px", "usage": "Small badges."},
+    {"name": "radius-md", "value": "14px", "usage": "Buttons and inputs."},
+    {"name": "radius-lg", "value": "22px", "usage": "Cards and panels."},
+    {"name": "radius-pill", "value": "999px", "usage": "Feedback chips."}
+  ]}
+}
