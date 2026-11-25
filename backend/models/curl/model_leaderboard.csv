@@ -1,5 +1,6 @@
 Model,Family,OOF Macro F1,Accuracy,Balanced Acc,ROC-AUC
-Unified Ensemble (RF+HGB+SVM),Soft-Voting Ensemble,0.9771,0.9772,0.9774,0.9958
-Random Forest,Tabular,0.9748,0.9749,0.9735,0.9952
-SVM (RBF),Tabular,0.9703,0.9704,0.971,0.9945
-HistGradientBoosting,Tabular,0.9702,0.9704,0.9695,0.9917
+Unified Ensemble (RF+HGB+SVM),Ensemble,0.9818,0.9819,0.9818,0.9946
+Stacking Ensemble (RF+HGB+SVM->LR),Ensemble,0.9749,0.9751,0.9743,0.9943
+HistGradientBoosting,Tabular,0.9749,0.9751,0.9745,0.9902
+SVM (RBF),Tabular,0.9636,0.9637,0.9644,0.9933
+Random Forest,Tabular,0.9634,0.9637,0.9619,0.9934

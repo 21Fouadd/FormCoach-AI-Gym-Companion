@@ -118,10 +118,10 @@ def generate_all6_rf_chart(out_png: Path) -> None:
     ex_specs = [
         ("shoulder", "Shoulder Press (RF)\n(25 subj · 1,961 reps)"),
         ("push", "Push-Up (RF)\n(35 subj · Multi-View)"),
-        ("lunge", "Lunge (Ensemble)\n(UI-PRMD · 255 reps)"),
-        ("arm_abduction", "Arm Abduction (Ensemble)\n(UI-PRMD · 144 reps)"),
         ("squat", "Squat (Ensemble)\n(UI-PRMD · 178 reps)"),
-        ("curl", "Bicep Curl (Ensemble)\n(NgoQuocBao · 439 reps)"),
+        ("arm_abduction", "Arm Abduction (Ensemble)\n(UI-PRMD · 144 reps)"),
+        ("lunge", "Lunge (Ensemble)\n(UI-PRMD+Ngo · 576 reps)"),
+        ("curl", "Bicep Curl (Ensemble)\n(NgoQuocBao · 441 reps)"),
     ]
     labels, f1s, aucs = [], [], []
     for ex_key, disp in ex_specs:
@@ -475,7 +475,7 @@ def build_deck() -> None:
     pt2.font.color.rgb = CYAN
 
     add_kpi_tile(s1, 0.85, 4.05, 2.75, 1.15, "7 + Auto", "6/7 ML + Stage-1 AI", EMERALD)
-    add_kpi_tile(s1, 3.85, 4.05, 2.75, 1.15, "0.977 / 0.927", "Curl & Squat Ensemble F1", CYAN)
+    add_kpi_tile(s1, 3.85, 4.05, 2.75, 1.15, "0.93–0.98 F1", "Curl · Lunge · Squat · Abd", CYAN)
     add_kpi_tile(s1, 6.85, 4.05, 2.75, 1.15, "3-Angle ID", "YuNet + SFace Biometric HUD", AMBER)
     add_kpi_tile(s1, 9.85, 4.05, 2.75, 1.15, "Web + Flutter", "FastAPI WS & TTS Coach", EMERALD)
 
@@ -733,7 +733,7 @@ def build_deck() -> None:
         s10, 8.42, 1.28, 4.36, 2.75, "Why Unified Soft-Voting Ensemble?",
         [
             "Combines 3 diverse families (Random Forest + HistGradientBoosting + SVM-RBF) in pure scikit-learn.",
-            "Beat single RF on Curl (0.9771), Squat (0.9267), and Lunge (0.8283, +11.6% F1 jump!) + tied Abduction (0.8894).",
+            "Beat single RF across all 4 upgraded exercises: Curl (0.9818), Lunge (0.9302, +7.7% vs RF), Arm Abduction (0.9268), Squat (0.9267).",
             "Push-Up (0.6444 RF / 0.6606 Deep+RF) & Shoulder (0.5873 RF) run live on CPU.",
         ],
         EMERALD, body_size=11.2,

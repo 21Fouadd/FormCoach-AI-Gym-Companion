@@ -10,10 +10,10 @@ Real-time computer-vision gym trainer combining **MediaPipe Pose 3D+2D kinematic
 
 | Exercise | Production Model | Datasets | Reps / Groups | OOF Macro F1 | ROC-AUC |
 | :--- | :--- | :--- | :---: | :---: | :---: |
-| **Bicep Curl** | **Unified Ensemble (`RF+HGB+SVM`)** (#1) | NgoQuocBao1010 | 439 / 77 | **0.9771** | **0.9958** |
+| **Bicep Curl** | **Unified Ensemble (`RF+HGB+SVM`)** (#1) | NgoQuocBao1010 | 441 / 77 | **0.9818** | **0.9946** |
+| **Lunge** | **Unified Ensemble (`RF+HGB+SVM`)** | UI-PRMD + NgoQuocBao1010 | 576 / 96 | **0.9302** | **0.9815** |
+| **Arm Abduction** | **Unified Ensemble (`RF+HGB+SVM`)** | UI-PRMD (Savitzky-Golay) | 144 / 10 | **0.9268** | **0.9784** |
 | **Squat** | **Unified Ensemble (`RF+HGB+SVM`)** (#1) | UI-PRMD | 178 / 10 | **0.9267** | **0.9204** |
-| **Arm Abduction** | **Unified Ensemble (`RF+HGB+SVM`)** | UI-PRMD | 144 / 10 | **0.8894** | **0.9739** |
-| **Lunge** | **Unified Ensemble (`RF+HGB+SVM`)** (#1) | UI-PRMD | 255 / 10 | **0.8283** | **0.9255** |
 | **Push-Up** | Random Forest *(Deep+RF Ensemble #1: `0.6606`)* | Mendeley + REHAB24-6 | 35 subj | **0.6444** | **0.7015** |
 | **Shoulder Press** | Random Forest *(SVM-RBF #1: `0.6205`)* | Mendeley | 1,961 / 25 | **0.5873** | **0.6535** |
 | **Bent-Over Row** | Calibrated Biomechanical Analyzer | Live Kinematics | — | Real-Time | — |

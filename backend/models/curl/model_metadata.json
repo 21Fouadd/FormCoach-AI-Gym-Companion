@@ -2,7 +2,7 @@
   "exercise": "curl",
   "winner_model": "Unified Ensemble (RF+HGB+SVM)",
   "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
-  "threshold": 0.42,
+  "threshold": 0.44,
   "sequence_length": 32,
   "features": [
     "left_elbow",
@@ -34,40 +34,48 @@
     27,
     28
   ],
-  "total_reps": 439,
+  "total_reps": 441,
   "unique_subjects": 77,
   "leaderboard": [
     {
       "Model": "Unified Ensemble (RF+HGB+SVM)",
-      "Family": "Soft-Voting Ensemble",
-      "OOF Macro F1": 0.9771,
-      "Accuracy": 0.9772,
-      "Balanced Acc": 0.9774,
-      "ROC-AUC": 0.9958
+      "Family": "Ensemble",
+      "OOF Macro F1": 0.9818,
+      "Accuracy": 0.9819,
+      "Balanced Acc": 0.9818,
+      "ROC-AUC": 0.9946
     },
     {
-      "Model": "Random Forest",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.9748,
-      "Accuracy": 0.9749,
-      "Balanced Acc": 0.9735,
-      "ROC-AUC": 0.9952
-    },
-    {
-      "Model": "SVM (RBF)",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.9703,
-      "Accuracy": 0.9704,
-      "Balanced Acc": 0.971,
-      "ROC-AUC": 0.9945
+      "Model": "Stacking Ensemble (RF+HGB+SVM->LR)",
+      "Family": "Ensemble",
+      "OOF Macro F1": 0.9749,
+      "Accuracy": 0.9751,
+      "Balanced Acc": 0.9743,
+      "ROC-AUC": 0.9943
     },
     {
       "Model": "HistGradientBoosting",
       "Family": "Tabular",
-      "OOF Macro F1": 0.9702,
-      "Accuracy": 0.9704,
-      "Balanced Acc": 0.9695,
-      "ROC-AUC": 0.9917
+      "OOF Macro F1": 0.9749,
+      "Accuracy": 0.9751,
+      "Balanced Acc": 0.9745,
+      "ROC-AUC": 0.9902
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9636,
+      "Accuracy": 0.9637,
+      "Balanced Acc": 0.9644,
+      "ROC-AUC": 0.9933
+    },
+    {
+      "Model": "Random Forest",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.9634,
+      "Accuracy": 0.9637,
+      "Balanced Acc": 0.9619,
+      "ROC-AUC": 0.9934
     }
   ]
 }
