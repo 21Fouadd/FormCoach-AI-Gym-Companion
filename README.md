@@ -15,7 +15,7 @@ Real-time computer-vision gym trainer combining **MediaPipe Pose 3D+2D kinematic
 | **Arm Abduction** | **Unified Ensemble (`RF+HGB+SVM`)** | UI-PRMD (Savitzky-Golay) | 144 / 10 | **0.9268** | **0.9784** |
 | **Squat** | **Unified Ensemble (`RF+HGB+SVM`)** (#1) | UI-PRMD | 178 / 10 | **0.9267** | **0.9204** |
 | **Push-Up** | Random Forest *(Deep+RF Ensemble #1: `0.6606`)* | Mendeley + REHAB24-6 | 35 subj | **0.6444** | **0.7015** |
-| **Shoulder Press** | Random Forest *(SVM-RBF #1: `0.6205`)* | Mendeley | 1,961 / 25 | **0.5873** | **0.6535** |
+| **Shoulder Press** | **Unified Ensemble (`RF+HGB+SVM`)** | Mendeley | 2,065 / 25 | **0.5898** | **0.6471** |
 | **Bent-Over Row** | Calibrated Biomechanical Analyzer | Live Kinematics | — | Real-Time | — |
 | **Athlete Profile AI** | SmartFit Random Forest (#1) | SmartFit (1,000 athletes) | 1,000 | **0.4589** | — |
 

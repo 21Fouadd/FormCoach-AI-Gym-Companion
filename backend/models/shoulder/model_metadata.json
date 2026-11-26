@@ -1,10 +1,9 @@
 {
   "exercise": "shoulder",
   "winner_model": "SVM (RBF)",
-  "best_tabular_model": "Random Forest",
-  "threshold": 0.5,
+  "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
+  "threshold": 0.53,
   "sequence_length": 32,
-  "frame_step": 3,
   "features": [
     "left_elbow",
     "right_elbow",
@@ -35,52 +34,48 @@
     27,
     28
   ],
-  "total_reps": 1961,
+  "total_reps": 2065,
   "unique_subjects": 25,
   "leaderboard": [
     {
       "Model": "SVM (RBF)",
       "Family": "Tabular",
-      "OOF Macro F1": 0.6205,
-      "Accuracy": 0.6211,
-      "Balanced Acc": 0.6206,
-      "Incorrect Precision": 0.6219,
-      "Incorrect Recall": 0.6499,
-      "ROC-AUC": 0.6784,
-      "Latency (ms/rep)": 1.53
+      "OOF Macro F1": 0.595,
+      "Accuracy": 0.5971,
+      "Balanced Acc": 0.5954,
+      "ROC-AUC": 0.6379
+    },
+    {
+      "Model": "Unified Ensemble (RF+HGB+SVM)",
+      "Family": "Ensemble",
+      "OOF Macro F1": 0.5898,
+      "Accuracy": 0.5903,
+      "Balanced Acc": 0.5898,
+      "ROC-AUC": 0.6471
     },
     {
       "Model": "Random Forest",
       "Family": "Tabular",
-      "OOF Macro F1": 0.5873,
-      "Accuracy": 0.5885,
-      "Balanced Acc": 0.5877,
-      "Incorrect Precision": 0.589,
-      "Incorrect Recall": 0.6309,
-      "ROC-AUC": 0.6535,
-      "Latency (ms/rep)": 57.77
+      "OOF Macro F1": 0.5875,
+      "Accuracy": 0.5908,
+      "Balanced Acc": 0.5886,
+      "ROC-AUC": 0.6486
     },
     {
-      "Model": "LightGBM",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.5859,
-      "Accuracy": 0.5864,
-      "Balanced Acc": 0.586,
-      "Incorrect Precision": 0.5901,
-      "Incorrect Recall": 0.6108,
-      "ROC-AUC": 0.6369,
-      "Latency (ms/rep)": 1.35
+      "Model": "Stacking Ensemble (RF+HGB+SVM->LR)",
+      "Family": "Ensemble",
+      "OOF Macro F1": 0.5756,
+      "Accuracy": 0.5763,
+      "Balanced Acc": 0.5756,
+      "ROC-AUC": 0.6402
     },
     {
-      "Model": "XGBoost",
+      "Model": "HistGradientBoosting",
       "Family": "Tabular",
-      "OOF Macro F1": 0.5834,
-      "Accuracy": 0.5839,
-      "Balanced Acc": 0.5835,
-      "Incorrect Precision": 0.5876,
-      "Incorrect Recall": 0.6088,
-      "ROC-AUC": 0.6397,
-      "Latency (ms/rep)": 0.77
+      "OOF Macro F1": 0.5749,
+      "Accuracy": 0.5768,
+      "Balanced Acc": 0.5753,
+      "ROC-AUC": 0.6226
     }
   ]
 }

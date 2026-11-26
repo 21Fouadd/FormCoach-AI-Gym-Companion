@@ -116,7 +116,7 @@ def generate_leaderboard_chart(csv_path: Path, title: str, highlight_model: str,
 def generate_all6_rf_chart(out_png: Path) -> None:
     """Plots OOF Macro F1 and ROC-AUC across all 6 deployed production models."""
     ex_specs = [
-        ("shoulder", "Shoulder Press (RF)\n(25 subj · 1,961 reps)"),
+        ("shoulder", "Shoulder Press (Ensemble)\n(25 subj · 2,065 reps)"),
         ("push", "Push-Up (RF)\n(35 subj · Multi-View)"),
         ("squat", "Squat (Ensemble)\n(UI-PRMD · 178 reps)"),
         ("arm_abduction", "Arm Abduction (Ensemble)\n(UI-PRMD · 144 reps)"),
