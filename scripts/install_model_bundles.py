@@ -42,7 +42,8 @@ def main() -> None:
         zips = [Path(a) for a in sys.argv[1:]]
     else:
         zips = sorted(
-            list(DOWNLOADS.glob("gym_model_bundle_unified_ensemble*.zip"))
+            list(DOWNLOADS.glob("gym_model_bundle_push_shoulder_ensemble*.zip"))
+            + list(DOWNLOADS.glob("gym_model_bundle_unified_ensemble*.zip"))
             + list(DOWNLOADS.glob("gym_model_bundle_curl_upgraded*.zip"))
             + list(DOWNLOADS.glob("gym_model_bundle_upgraded*.zip"))
             + list(DOWNLOADS.glob("gym_model_bundle_remaining5*.zip")),
