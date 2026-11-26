@@ -11,6 +11,10 @@
 # 4. Exports **`gym_model_bundle_push_shoulder_ensemble.zip`** — drop-in compatible with `backend/models/`.
 
 # %%
+import subprocess, sys
+subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "mediapipe"])
+
+# %%
 import json
 import re
 import shutil
