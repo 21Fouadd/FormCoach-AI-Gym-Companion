@@ -29,7 +29,7 @@ import cv2
 import joblib
 import mediapipe as mp
 import numpy as np
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, savgol_filter
 
 MODELS_ROOT = Path(__file__).resolve().parent.parent / "models"
 MODELS_ROOT.mkdir(parents=True, exist_ok=True)
@@ -351,107 +351,222 @@ def diagnose_voice_cues(
     ml_incorrect: bool | None = None,
     hips_visible: bool = True,
     active_arm: int | None = None,
+    prob_incorrect: float | None = None,
+    threshold: float = 0.5,
 ) -> tuple[bool, list[str]]:
-    """Produces specific, human-friendly voice cues from the rep's biomechanical profile."""
+    """Produces detailed, angle-specific coaching cues + hybrid ML/biomechanical verdict."""
+    # Smooth raw angle sequence with Savitzky-Golay (matches training preprocessing & removes webcam jitter)
+    seq = angle_seq.astype(np.float32)
+    if len(seq) >= 7:
+        try:
+            seq = savgol_filter(seq, window_length=7, polyorder=2, axis=0).astype(np.float32)
+        except Exception:
+            pass
+
     cues: list[str] = []
-    l_elb, r_elb = angle_seq[:, 0], angle_seq[:, 1]
-    l_sho, r_sho = angle_seq[:, 2], angle_seq[:, 3]
-    l_hip, r_hip = angle_seq[:, 4], angle_seq[:, 5]
-    torso_tilt = angle_seq[:, 6]
-    sho_tilt = angle_seq[:, 7]
-    hip_tilt = angle_seq[:, 8]
-    body_line = angle_seq[:, 11]
-    l_knee, r_knee = angle_seq[:, 12], angle_seq[:, 13]
+    severe_fault = False
+
+    l_elb, r_elb = seq[:, 0], seq[:, 1]
+    l_sho, r_sho = seq[:, 2], seq[:, 3]
+    l_hip, r_hip = seq[:, 4], seq[:, 5]
+    torso_tilt = seq[:, 6]
+    sho_tilt = seq[:, 7]
+    hip_tilt = seq[:, 8]
+    body_line = seq[:, 11]
+    l_knee, r_knee = seq[:, 12], seq[:, 13]
     avg_knee = 0.5 * (l_knee + r_knee)
     avg_elb = 0.5 * (l_elb + r_elb)
     avg_sho = 0.5 * (l_sho + r_sho)
     avg_hip = 0.5 * (l_hip + r_hip)
 
+    positive_msg = "Great rep! Clean form and controlled tempo."
+
     if exercise == "squat":
-        if hips_visible and float(np.percentile(torso_tilt, 90)) > 42.0:
-            cues.append("Keep your back straight and chest up")
-        if float(np.min(avg_knee)) > 110.0:
-            cues.append("Go deeper on your squat")
-        if hips_visible and float(np.percentile(hip_tilt, 85)) > 12.0:
-            cues.append("Keep your hips level")
-        if float(np.mean(np.abs(l_knee - r_knee))) > 18.0:
-            cues.append("Keep both knees aligned evenly")
+        p90_torso = float(np.percentile(torso_tilt, 90))
+        min_knee = float(np.min(avg_knee))
+        p85_hip_tilt = float(np.percentile(hip_tilt, 85))
+        knee_asym = float(np.mean(np.abs(l_knee - r_knee)))
+        peak_vel = float(np.max(np.abs(np.diff(avg_knee)))) if len(avg_knee) > 2 else 0.0
+
+        if hips_visible and p90_torso > 42.0:
+            cues.append(f"Chest leaning too far forward ({p90_torso:.0f}° torso tilt) — brace your core and keep your chest proud")
+            if p90_torso > 52.0:
+                severe_fault = True
+        if min_knee > 110.0:
+            cues.append(f"Squat depth is shallow (min knee {min_knee:.0f}°) — sit hips lower toward parallel (~95°)")
+            if min_knee > 125.0:
+                severe_fault = True
+        if hips_visible and p85_hip_tilt > 12.0:
+            cues.append(f"Hips shifting unevenly ({p85_hip_tilt:.0f}° tilt) — drive evenly through both heels")
+        if knee_asym > 18.0:
+            side = "left" if float(np.min(l_knee)) > float(np.min(r_knee)) else "right"
+            cues.append(f"Uneven knee tracking ({knee_asym:.0f}° gap) — align your {side} knee evenly over toes")
+        if peak_vel > 22.0 and not cues:
+            cues.append("Control your descent speed — lower smoothly for ~2 seconds instead of dropping")
+        positive_msg = f"Great squat! Solid depth ({min_knee:.0f}° knee) and upright torso."
+
     elif exercise == "push":
-        if hips_visible and float(np.min(body_line)) < 150.0:
-            cues.append("Keep your back straight and core tight")
-        if float(np.min(np.minimum(l_elb, r_elb))) > 106.0:
-            cues.append("Lower your chest closer to the floor")
-        if float(np.percentile(avg_sho, 85)) > 78.0:
-            cues.append("Tuck your elbows in, don't flare them")
+        min_body = float(np.min(body_line))
+        min_elb = float(np.min(np.minimum(l_elb, r_elb)))
+        p85_sho = float(np.percentile(avg_sho, 85))
+        p85_sho_tilt = float(np.percentile(sho_tilt, 85))
+
+        if hips_visible and min_body < 150.0:
+            cues.append(f"Hips sagging or back arching ({min_body:.0f}° body line) — squeeze glutes and brace your core straight")
+            if min_body < 138.0:
+                severe_fault = True
+        if min_elb > 106.0:
+            cues.append(f"Partial push-up depth (min elbow {min_elb:.0f}°) — lower your chest closer to the floor (~90°)")
+            if min_elb > 122.0:
+                severe_fault = True
+        if p85_sho > 78.0:
+            cues.append(f"Elbows flaring wide ({p85_sho:.0f}° shoulder angle) — tuck elbows ~45° toward your ribs")
+        if p85_sho_tilt > 14.0:
+            cues.append(f"Uneven push-up press ({p85_sho_tilt:.0f}° shoulder tilt) — push evenly through both hands")
+        positive_msg = f"Clean push-up! Strong depth ({min_elb:.0f}° elbow) and straight plank line."
+
     elif exercise == "curl":
         if active_arm == 0:
-            cur_elb, cur_sho = l_elb, l_sho
+            cur_elb, cur_sho, arm_lbl = l_elb, l_sho, "left"
         elif active_arm == 1:
-            cur_elb, cur_sho = r_elb, r_sho
+            cur_elb, cur_sho, arm_lbl = r_elb, r_sho, "right"
         else:
-            # Pick whichever arm curled more so one-arm curls aren't penalized by the resting arm
             if _rom_p90_p10(l_elb) >= _rom_p90_p10(r_elb):
-                cur_elb, cur_sho = l_elb, l_sho
+                cur_elb, cur_sho, arm_lbl = l_elb, l_sho, "left"
             else:
-                cur_elb, cur_sho = r_elb, r_sho
+                cur_elb, cur_sho, arm_lbl = r_elb, r_sho, "right"
 
         torso_swing = float(np.percentile(torso_tilt, 90) - np.percentile(torso_tilt, 10))
-        if hips_visible and (torso_swing > 18.0 or float(np.percentile(torso_tilt, 90)) > 28.0):
-            cues.append("Keep your back straight, avoid swinging")
-        if float(np.percentile(cur_sho, 85)) > 52.0:
-            cues.append("Keep your elbows pinned to your sides")
-        if float(np.min(cur_elb)) > 108.0:
-            cues.append("Curl higher for full range of motion")
+        p90_torso = float(np.percentile(torso_tilt, 90))
+        p85_sho = float(np.percentile(cur_sho, 85))
+        min_elb = float(np.min(cur_elb))
+        max_elb = float(np.max(cur_elb))
+        peak_vel = float(np.max(np.abs(np.diff(cur_elb)))) if len(cur_elb) > 2 else 0.0
+
+        if hips_visible and (torso_swing > 18.0 or p90_torso > 28.0):
+            cues.append(f"Torso swinging for momentum ({max(torso_swing, p90_torso):.0f}° lean) — brace abs and keep back still")
+            if torso_swing > 26.0 or p90_torso > 35.0:
+                severe_fault = True
+        if p85_sho > 52.0:
+            cues.append(f"{arm_lbl.capitalize()} elbow drifting forward ({p85_sho:.0f}° shoulder) — pin your upper arm to your ribs")
+            if p85_sho > 68.0:
+                severe_fault = True
+        if min_elb > 108.0:
+            cues.append(f"Incomplete peak squeeze on {arm_lbl} arm (min elbow {min_elb:.0f}°) — curl higher toward your shoulder")
+            if min_elb > 122.0:
+                severe_fault = True
+        if max_elb < 132.0:
+            cues.append(f"Incomplete bottom extension ({max_elb:.0f}° max elbow) — lower weight smoothly to full stretch")
+        if peak_vel > 28.0 and not cues:
+            cues.append("Rep tempo is too fast — pause 1s at the top and lower with control")
+        positive_msg = f"Clean {arm_lbl} curl! Full squeeze ({min_elb:.0f}° elbow) with steady upper arm."
+
     elif exercise == "shoulder":
         torso_swing = float(np.percentile(torso_tilt, 90) - np.percentile(torso_tilt, 10))
-        if hips_visible and (torso_swing > 18.0 or float(np.percentile(torso_tilt, 90)) > 24.0):
-            cues.append("Keep your back straight and brace your core")
-        if float(np.max(np.maximum(l_elb, r_elb))) < 136.0:
-            cues.append("Press all the way overhead")
-        if float(np.percentile(sho_tilt, 85)) > 15.0 and min(_rom_p90_p10(l_sho), _rom_p90_p10(r_sho)) > 35.0:
-            cues.append("Press both arms evenly")
+        p90_torso = float(np.percentile(torso_tilt, 90))
+        max_elb = float(np.max(np.maximum(l_elb, r_elb)))
+        p85_sho_tilt = float(np.percentile(sho_tilt, 85))
+
+        if hips_visible and (torso_swing > 18.0 or p90_torso > 24.0):
+            cues.append(f"Lower back arching / leaning back ({max(torso_swing, p90_torso):.0f}° torso tilt) — squeeze glutes and ribs down")
+            if p90_torso > 32.0:
+                severe_fault = True
+        if max_elb < 136.0:
+            cues.append(f"Incomplete overhead lockout (max elbow {max_elb:.0f}°) — press straight up to full extension (~165°)")
+            if max_elb < 120.0:
+                severe_fault = True
+        if p85_sho_tilt > 15.0 and min(_rom_p90_p10(l_sho), _rom_p90_p10(r_sho)) > 35.0:
+            cues.append(f"Uneven overhead press ({p85_sho_tilt:.0f}° shoulder tilt) — drive both arms up evenly")
+        positive_msg = f"Strong overhead press! Full lockout ({max_elb:.0f}° elbow) and braced core."
+
     elif exercise == "row":
         elb_rom = max(_rom_p90_p10(l_elb), _rom_p90_p10(r_elb))
         hip_rom = _rom_p90_p10(avg_hip)
         if elb_rom >= 32.0 and elb_rom >= 0.70 * hip_rom:
-            # Bent-Over Row form checks
-            if hips_visible and float(np.mean(torso_tilt)) < 22.0:
-                cues.append("Hinge forward more with a flat back")
-            if float(np.min(np.minimum(l_elb, r_elb))) > 115.0:
-                cues.append("Pull your elbows higher toward your torso")
-            if float(np.percentile(np.maximum(l_sho, r_sho), 85)) > 78.0:
-                cues.append("Tuck your elbows closer to your torso")
+            mean_torso = float(np.mean(torso_tilt))
+            min_elb = float(np.min(np.minimum(l_elb, r_elb)))
+            p85_sho = float(np.percentile(np.maximum(l_sho, r_sho), 85))
+            if hips_visible and mean_torso < 22.0:
+                cues.append(f"Torso too upright ({mean_torso:.0f}° hinge) — hinge forward ~45° with a flat back")
+            if min_elb > 115.0:
+                cues.append(f"Short pull range (min elbow {min_elb:.0f}°) — drive elbows higher past your ribs and squeeze lats")
+            if p85_sho > 78.0:
+                cues.append(f"Elbows flaring wide ({p85_sho:.0f}°) — keep elbows tucked closer to your sides")
+            positive_msg = f"Great row! Strong back pull ({min_elb:.0f}° elbow) and solid hip hinge."
         else:
-            # Deadlift / Hip-Hinge form checks
-            if float(np.max(avg_hip)) < 150.0:
-                cues.append("Stand tall and lock out your hips at the top")
-            if hips_visible and float(np.percentile(hip_tilt, 85)) > 14.0:
-                cues.append("Keep your hips square throughout the pull")
+            max_hip = float(np.max(avg_hip))
+            p85_hip_tilt = float(np.percentile(hip_tilt, 85))
+            if max_hip < 150.0:
+                cues.append(f"Incomplete hip lockout (max hip {max_hip:.0f}°) — squeeze glutes and stand tall at the top")
+            if hips_visible and p85_hip_tilt > 14.0:
+                cues.append(f"Hips tilting sideways ({p85_hip_tilt:.0f}°) — keep pelvis square throughout the pull")
+            positive_msg = f"Clean hinge/deadlift! Full hip lockout ({max_hip:.0f}°) and balanced stance."
+
     elif exercise == "lunge":
-        if hips_visible and float(np.percentile(torso_tilt, 90)) > 32.0:
-            cues.append("Keep your torso upright during your lunge")
-        if float(np.min(np.minimum(l_knee, r_knee))) > 108.0:
-            cues.append("Drop your back knee lower for full depth")
+        p90_torso = float(np.percentile(torso_tilt, 90))
+        min_knee = float(np.min(np.minimum(l_knee, r_knee)))
+        p85_hip_tilt = float(np.percentile(hip_tilt, 85))
+        if hips_visible and p90_torso > 32.0:
+            cues.append(f"Torso leaning forward ({p90_torso:.0f}° tilt) — keep shoulders stacked tall over your hips")
+            if p90_torso > 42.0:
+                severe_fault = True
+        if min_knee > 108.0:
+            cues.append(f"Shallow lunge depth (min knee {min_knee:.0f}°) — drop your back knee lower toward ~90°")
+            if min_knee > 122.0:
+                severe_fault = True
+        if hips_visible and p85_hip_tilt > 14.0:
+            cues.append(f"Pelvis tilting sideways ({p85_hip_tilt:.0f}°) — stabilize core and keep hips level")
+        positive_msg = f"Great lunge! Deep knee bend ({min_knee:.0f}°) and tall upright torso."
+
     elif exercise == "arm_abduction":
         torso_swing = float(np.percentile(torso_tilt, 90) - np.percentile(torso_tilt, 10))
-        if hips_visible and (torso_swing > 18.0 or float(np.percentile(torso_tilt, 90)) > 24.0):
-            cues.append("Keep your torso still, avoid leaning")
-        if float(np.max(np.maximum(l_sho, r_sho))) < 70.0:
-            cues.append("Raise your arms up to shoulder height")
+        p90_torso = float(np.percentile(torso_tilt, 90))
+        max_sho = float(np.max(np.maximum(l_sho, r_sho)))
         active_elb = l_elb if _rom_p90_p10(l_sho) >= _rom_p90_p10(r_sho) else r_elb
-        if float(np.median(active_elb)) < 120.0:
-            cues.append("Keep arms extended with only a soft elbow bend")
+        med_elb = float(np.median(active_elb))
 
+        if hips_visible and (torso_swing > 18.0 or p90_torso > 24.0):
+            cues.append(f"Torso leaning or swinging ({max(torso_swing, p90_torso):.0f}° tilt) — keep core still and lower slowly")
+            if torso_swing > 26.0:
+                severe_fault = True
+        if max_sho < 70.0:
+            cues.append(f"Arms raised too low (peak shoulder {max_sho:.0f}°) — lift smoothly to 85–95° shoulder height")
+            if max_sho < 55.0:
+                severe_fault = True
+        if med_elb < 120.0:
+            cues.append(f"Elbows bent too much ({med_elb:.0f}°) — keep arms long with only a slight ~15° soft bend")
+        positive_msg = f"Clean lateral raise! Smooth height ({max_sho:.0f}° shoulder) and controlled torso."
+
+    # Hybrid ML + Biomechanical Confidence Fusion:
+    # - High-confidence ML (>= thr+0.12) always flags Incorrect
+    # - Borderline ML (within ±0.12 of thr) uses biomechanical fault cues as tiebreaker (cuts false alarms!)
+    # - Severe biomechanical fault always flags Incorrect
     if ml_incorrect is None:
         is_incorrect = len(cues) > 0
+    elif prob_incorrect is not None:
+        if severe_fault or prob_incorrect >= (threshold + 0.12):
+            is_incorrect = True
+        elif prob_incorrect <= (threshold - 0.12):
+            is_incorrect = False
+        else:
+            is_incorrect = len(cues) > 0
     else:
-        is_incorrect = ml_incorrect
-        if is_incorrect and not cues:
-            cues.append("Control your form and tempo")
+        is_incorrect = ml_incorrect or severe_fault
+
+    if is_incorrect and not cues:
+        # Give a specific kinematic cue even when ML caught a subtle timing/asymmetry fault
+        asym_elb = float(np.mean(np.abs(l_elb - r_elb)))
+        asym_knee = float(np.mean(np.abs(l_knee - r_knee)))
+        if exercise in ("squat", "lunge") and asym_knee > 12.0:
+            cues.append(f"Subtle leg asymmetry detected ({asym_knee:.0f}° L/R knee gap) — balance weight evenly")
+        elif exercise in ("push", "curl", "shoulder", "arm_abduction") and asym_elb > 14.0:
+            cues.append(f"Subtle arm asymmetry detected ({asym_elb:.0f}° L/R gap) — move both sides smoothly together")
+        else:
+            cues.append("Subtle form or tempo drift detected — slow down the lowering phase and brace your core")
 
     if not is_incorrect:
-        cues = ["Great rep! Clean form."]
-    return is_incorrect, cues[:2]
+        cues = [positive_msg]
+    return is_incorrect, cues[:3]
 
 
 class LoadedExerciseModel:
@@ -526,8 +641,16 @@ class LoadedExerciseModel:
     ) -> dict[str, Any]:
         probs: list[tuple[float, float]] = []
 
+        # Smooth angles with Savitzky-Golay before tabular inference (matches Colab training!)
+        smooth_seq = angle_seq.astype(np.float32)
+        if len(smooth_seq) >= 7:
+            try:
+                smooth_seq = savgol_filter(smooth_seq, window_length=7, polyorder=2, axis=0).astype(np.float32)
+            except Exception:
+                pass
+
         if self.tab_model is not None:
-            x_tab = build_tabular_features(angle_seq[None])
+            x_tab = build_tabular_features(smooth_seq[None])
             p_tab = float(self.tab_model.predict_proba(x_tab)[0, 1])
             probs.append((0.45, p_tab))
 
@@ -549,10 +672,10 @@ class LoadedExerciseModel:
                 p_deep = float(self.deep_model.predict(ang_in, verbose=0).ravel()[0])
             probs.append((0.55, p_deep))
 
+        threshold = float(self.metadata.get("threshold", 0.5))
         if probs:
             total_w = sum(w for w, _ in probs)
             prob_incorrect = sum(w * p for w, p in probs) / total_w
-            threshold = float(self.metadata.get("threshold", 0.5))
             ml_incorrect: bool | None = prob_incorrect >= threshold
         else:
             prob_incorrect = None
@@ -560,10 +683,12 @@ class LoadedExerciseModel:
 
         is_incorrect, cues = diagnose_voice_cues(
             self.exercise,
-            angle_seq,
+            smooth_seq,
             ml_incorrect=ml_incorrect,
             hips_visible=hips_visible,
             active_arm=active_arm,
+            prob_incorrect=prob_incorrect,
+            threshold=threshold,
         )
         if prob_incorrect is None:
             prob_incorrect = 0.82 if is_incorrect else 0.14
