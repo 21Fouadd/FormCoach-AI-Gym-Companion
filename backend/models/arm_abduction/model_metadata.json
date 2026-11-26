@@ -1,9 +1,10 @@
 {
   "exercise": "arm_abduction",
-  "winner_model": "HistGradientBoosting",
-  "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
-  "threshold": 0.6,
+  "winner_model": "LightGBM",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.5,
   "sequence_length": 32,
+  "frame_step": 3,
   "features": [
     "left_elbow",
     "right_elbow",
@@ -34,48 +35,52 @@
     27,
     28
   ],
-  "total_reps": 144,
-  "unique_subjects": 10,
+  "total_reps": 178,
+  "unique_subjects": 9,
   "leaderboard": [
     {
-      "Model": "HistGradientBoosting",
+      "Model": "LightGBM",
       "Family": "Tabular",
-      "OOF Macro F1": 0.9354,
-      "Accuracy": 0.9444,
-      "Balanced Acc": 0.9409,
-      "ROC-AUC": 0.983
+      "OOF Macro F1": 0.713,
+      "Accuracy": 0.7135,
+      "Balanced Acc": 0.7131,
+      "Incorrect Precision": 0.7229,
+      "Incorrect Recall": 0.6818,
+      "ROC-AUC": 0.779,
+      "Latency (ms/rep)": 1.89
     },
     {
-      "Model": "Unified Ensemble (RF+HGB+SVM)",
-      "Family": "Ensemble",
-      "OOF Macro F1": 0.9268,
-      "Accuracy": 0.9375,
-      "Balanced Acc": 0.9295,
-      "ROC-AUC": 0.9784
+      "Model": "XGBoost",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.7075,
+      "Accuracy": 0.7079,
+      "Balanced Acc": 0.7076,
+      "Incorrect Precision": 0.7143,
+      "Incorrect Recall": 0.6818,
+      "ROC-AUC": 0.7741,
+      "Latency (ms/rep)": 0.72
     },
     {
       "Model": "Random Forest",
       "Family": "Tabular",
-      "OOF Macro F1": 0.8809,
-      "Accuracy": 0.8958,
-      "Balanced Acc": 0.8932,
-      "ROC-AUC": 0.9727
+      "OOF Macro F1": 0.6741,
+      "Accuracy": 0.6742,
+      "Balanced Acc": 0.6744,
+      "Incorrect Precision": 0.663,
+      "Incorrect Recall": 0.6932,
+      "ROC-AUC": 0.7486,
+      "Latency (ms/rep)": 56.92
     },
     {
       "Model": "SVM (RBF)",
       "Family": "Tabular",
-      "OOF Macro F1": 0.8194,
-      "Accuracy": 0.8333,
-      "Balanced Acc": 0.8545,
-      "ROC-AUC": 0.9495
-    },
-    {
-      "Model": "Stacking Ensemble (RF+HGB+SVM->LR)",
-      "Family": "Ensemble",
-      "OOF Macro F1": 0.8151,
-      "Accuracy": 0.8472,
-      "Balanced Acc": 0.8073,
-      "ROC-AUC": 0.9573
+      "OOF Macro F1": 0.6235,
+      "Accuracy": 0.6236,
+      "Balanced Acc": 0.6239,
+      "Incorrect Precision": 0.6129,
+      "Incorrect Recall": 0.6477,
+      "ROC-AUC": 0.6966,
+      "Latency (ms/rep)": 0.63
     }
   ]
 }

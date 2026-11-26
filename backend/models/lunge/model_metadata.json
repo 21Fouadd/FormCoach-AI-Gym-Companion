@@ -1,9 +1,10 @@
 {
   "exercise": "lunge",
-  "winner_model": "SVM (RBF)",
-  "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
-  "threshold": 0.62,
+  "winner_model": "XGBoost",
+  "best_tabular_model": "Random Forest",
+  "threshold": 0.5,
   "sequence_length": 32,
+  "frame_step": 3,
   "features": [
     "left_elbow",
     "right_elbow",
@@ -34,48 +35,52 @@
     27,
     28
   ],
-  "total_reps": 576,
-  "unique_subjects": 96,
+  "total_reps": 165,
+  "unique_subjects": 8,
   "leaderboard": [
     {
-      "Model": "SVM (RBF)",
+      "Model": "XGBoost",
       "Family": "Tabular",
-      "OOF Macro F1": 0.9371,
-      "Accuracy": 0.9375,
-      "Balanced Acc": 0.9362,
-      "ROC-AUC": 0.9866
+      "OOF Macro F1": 0.7067,
+      "Accuracy": 0.7091,
+      "Balanced Acc": 0.709,
+      "Incorrect Precision": 0.7586,
+      "Incorrect Recall": 0.7097,
+      "ROC-AUC": 0.7097,
+      "Latency (ms/rep)": 1.99
     },
     {
-      "Model": "Unified Ensemble (RF+HGB+SVM)",
-      "Family": "Ensemble",
-      "OOF Macro F1": 0.9302,
-      "Accuracy": 0.9306,
-      "Balanced Acc": 0.93,
-      "ROC-AUC": 0.9815
-    },
-    {
-      "Model": "Stacking Ensemble (RF+HGB+SVM->LR)",
-      "Family": "Ensemble",
-      "OOF Macro F1": 0.911,
-      "Accuracy": 0.9115,
-      "Balanced Acc": 0.9107,
-      "ROC-AUC": 0.9721
-    },
-    {
-      "Model": "HistGradientBoosting",
+      "Model": "LightGBM",
       "Family": "Tabular",
-      "OOF Macro F1": 0.8855,
-      "Accuracy": 0.8872,
-      "Balanced Acc": 0.8831,
-      "ROC-AUC": 0.9667
+      "OOF Macro F1": 0.7002,
+      "Accuracy": 0.703,
+      "Balanced Acc": 0.7021,
+      "Incorrect Precision": 0.75,
+      "Incorrect Recall": 0.7097,
+      "ROC-AUC": 0.7233,
+      "Latency (ms/rep)": 1.41
     },
     {
       "Model": "Random Forest",
       "Family": "Tabular",
-      "OOF Macro F1": 0.8528,
-      "Accuracy": 0.8576,
-      "Balanced Acc": 0.8492,
-      "ROC-AUC": 0.972
+      "OOF Macro F1": 0.6774,
+      "Accuracy": 0.6848,
+      "Balanced Acc": 0.6765,
+      "Incorrect Precision": 0.7113,
+      "Incorrect Recall": 0.7419,
+      "ROC-AUC": 0.7062,
+      "Latency (ms/rep)": 57.53
+    },
+    {
+      "Model": "SVM (RBF)",
+      "Family": "Tabular",
+      "OOF Macro F1": 0.5647,
+      "Accuracy": 0.6,
+      "Balanced Acc": 0.573,
+      "Incorrect Precision": 0.6134,
+      "Incorrect Recall": 0.7849,
+      "ROC-AUC": 0.617,
+      "Latency (ms/rep)": 0.59
     }
   ]
 }

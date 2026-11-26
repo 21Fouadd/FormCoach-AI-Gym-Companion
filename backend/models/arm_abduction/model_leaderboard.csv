@@ -1,6 +1,5 @@
-Model,Family,OOF Macro F1,Accuracy,Balanced Acc,ROC-AUC
-HistGradientBoosting,Tabular,0.9354,0.9444,0.9409,0.983
-Unified Ensemble (RF+HGB+SVM),Ensemble,0.9268,0.9375,0.9295,0.9784
-Random Forest,Tabular,0.8809,0.8958,0.8932,0.9727
-SVM (RBF),Tabular,0.8194,0.8333,0.8545,0.9495
-Stacking Ensemble (RF+HGB+SVM->LR),Ensemble,0.8151,0.8472,0.8073,0.9573
+Model,Family,OOF Macro F1,Accuracy,Balanced Acc,Incorrect Precision,Incorrect Recall,ROC-AUC,Latency (ms/rep)
+LightGBM,Tabular,0.713,0.7135,0.7131,0.7229,0.6818,0.779,1.89
+XGBoost,Tabular,0.7075,0.7079,0.7076,0.7143,0.6818,0.7741,0.72
+Random Forest,Tabular,0.6741,0.6742,0.6744,0.663,0.6932,0.7486,56.92
+SVM (RBF),Tabular,0.6235,0.6236,0.6239,0.6129,0.6477,0.6966,0.63

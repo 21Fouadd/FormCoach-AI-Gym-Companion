@@ -1,9 +1,15 @@
 {
   "exercise": "squat",
-  "winner_model": "Unified Ensemble (RF+HGB+SVM)",
-  "best_tabular_model": "Unified Ensemble (RF+HGB+SVM)",
-  "threshold": 0.52,
+  "winner_model": "Random Forest",
+  "best_deep_model": "1D CNN",
+  "best_tabular_model": "Random Forest",
+  "ensemble_weights": {
+    "deep": 0.55,
+    "tabular": 0.45
+  },
+  "threshold": 0.5,
   "sequence_length": 32,
+  "frame_step": 3,
   "features": [
     "left_elbow",
     "right_elbow",
@@ -34,40 +40,54 @@
     27,
     28
   ],
-  "total_reps": 178,
-  "unique_subjects": 10,
-  "leaderboard": [
-    {
-      "Model": "Unified Ensemble (RF+HGB+SVM)",
-      "Family": "Soft-Voting Ensemble",
-      "OOF Macro F1": 0.9267,
-      "Accuracy": 0.927,
-      "Balanced Acc": 0.9336,
-      "ROC-AUC": 0.9204
-    },
+  "leaderboard_top3": [
     {
       "Model": "Random Forest",
       "Family": "Tabular",
-      "OOF Macro F1": 0.9154,
-      "Accuracy": 0.9157,
-      "Balanced Acc": 0.9222,
-      "ROC-AUC": 0.9202
+      "OOF Macro F1": 0.6675,
+      "Fold F1 (Mean\u00b1Std)": "0.664 \u00b1 0.028",
+      "Accuracy": 0.6818,
+      "Balanced Acc": 0.6661,
+      "Incorrect Precision": 0.6633,
+      "Incorrect Recall": 0.5451,
+      "PR-AUC": 0.6757,
+      "ROC-AUC": 0.7178,
+      "Latency (ms/rep)": 47.98,
+      "Train (s/fold)": 1.79,
+      "Model Size (KB)": 2130.9,
+      "Real-Time Ready (<50ms)": "YES"
     },
     {
-      "Model": "HistGradientBoosting",
+      "Model": "XGBoost",
       "Family": "Tabular",
-      "OOF Macro F1": 0.8931,
-      "Accuracy": 0.8933,
-      "Balanced Acc": 0.9022,
-      "ROC-AUC": 0.936
+      "OOF Macro F1": 0.6524,
+      "Fold F1 (Mean\u00b1Std)": "0.650 \u00b1 0.034",
+      "Accuracy": 0.6604,
+      "Balanced Acc": 0.6516,
+      "Incorrect Precision": 0.6156,
+      "Incorrect Recall": 0.584,
+      "PR-AUC": 0.6574,
+      "ROC-AUC": 0.7083,
+      "Latency (ms/rep)": 0.57,
+      "Train (s/fold)": 0.89,
+      "Model Size (KB)": 88.6,
+      "Real-Time Ready (<50ms)": "YES"
     },
     {
-      "Model": "SVM (RBF)",
-      "Family": "Tabular",
-      "OOF Macro F1": 0.8483,
-      "Accuracy": 0.8483,
-      "Balanced Acc": 0.8594,
-      "ROC-AUC": 0.9017
+      "Model": "Ensemble (1D CNN + Random Forest)",
+      "Family": "Merged Ensemble",
+      "OOF Macro F1": 0.6492,
+      "Fold F1 (Mean\u00b1Std)": "0.646 \u00b1 0.061",
+      "Accuracy": 0.656,
+      "Balanced Acc": 0.6489,
+      "Incorrect Precision": 0.6067,
+      "Incorrect Recall": 0.5943,
+      "PR-AUC": 0.6622,
+      "ROC-AUC": 0.7171,
+      "Latency (ms/rep)": 61.31,
+      "Train (s/fold)": 22.42,
+      "Model Size (KB)": 2198.5,
+      "Real-Time Ready (<50ms)": "NO"
     }
   ]
 }

@@ -388,9 +388,9 @@ def diagnose_voice_cues(
         knee_asym = float(np.mean(np.abs(l_knee - r_knee)))
         peak_vel = float(np.max(np.abs(np.diff(avg_knee)))) if len(avg_knee) > 2 else 0.0
 
-        if hips_visible and p90_torso > 42.0:
+        if hips_visible and p90_torso > 52.0:
             cues.append(f"Chest leaning too far forward ({p90_torso:.0f}° torso tilt) — brace your core and keep your chest proud")
-            if p90_torso > 52.0:
+            if p90_torso > 60.0:
                 severe_fault = True
         if min_knee > 110.0:
             cues.append(f"Squat depth is shallow (min knee {min_knee:.0f}°) — sit hips lower toward parallel (~95°)")
@@ -538,15 +538,14 @@ def diagnose_voice_cues(
         positive_msg = f"Clean lateral raise! Smooth height ({max_sho:.0f}° shoulder) and controlled torso."
 
     # Hybrid ML + Biomechanical Confidence Fusion:
-    # - High-confidence ML (>= thr+0.12) always flags Incorrect
-    # - Borderline ML (within ±0.12 of thr) uses biomechanical fault cues as tiebreaker (cuts false alarms!)
-    # - Severe biomechanical fault always flags Incorrect
+    # - Clear biomechanical fault or very high-confidence ML (>= thr + 0.18) flags Incorrect
+    # - Borderline ML relies on real biomechanical faults so clean webcam reps aren't falsely flagged!
     if ml_incorrect is None:
         is_incorrect = len(cues) > 0
     elif prob_incorrect is not None:
-        if severe_fault or prob_incorrect >= (threshold + 0.12):
+        if severe_fault or prob_incorrect >= (threshold + 0.18):
             is_incorrect = True
-        elif prob_incorrect <= (threshold - 0.12):
+        elif prob_incorrect <= (threshold - 0.10):
             is_incorrect = False
         else:
             is_incorrect = len(cues) > 0
